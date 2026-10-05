@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Check-in</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root {
+  --green: #00B900;
+  --green-dk: #009900;
+  --green-lt: #e6f9e6;
+  --green-bd: #99d499;
+  --bg: #f0f2f0;
+  --white: #ffffff;
+  --tx: #1a1a1a;
+  --tx2: #666666;
+  --tx3: #aaaaaa;
+  --bd: #e0e0e0;
+  --bd2: #c8c8c8;
+  --red: #e53935;
+  --r: 14px;
+  --ri: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:15px;line-height:1.5}
+
+/* ── Header ── */
+.hdr{background:var(--green);padding:env(safe-area-inset-top,0) 0 0;position:sticky;top:0;z-index:100}
+.hdr-inner{display:flex;align-items:center;gap:10px;padding:12px 16px}
+.hdr-logo{width:34px;height:34px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.hdr h1{color:#fff;font-size:15px;font-weight:700;line-height:1.2}
+.hdr p{color:rgba(255,255,255,0.8);font-size:11px}
+.date-strip{background:rgba(0,0,0,0.15);padding:6px 16px;font-size:12px;color:#fff;display:flex;align-items:center;gap:5px}
+
+/* ── Form body ── */
+.form{padding:12px;display:flex;flex-direction:column;gap:10px;padding-bottom:100px}
+
+/* ── Section card ── */
+.sec{background:var(--white);border-radius:var(--r);border:0.5px solid var(--bd);overflow:visible}
+.sec-hd{padding:10px 14px 0;font-size:11px;font-weight:700;color:var(--tx2);letter-spacing:0.3px;display:flex;align-items:center;gap:5px}
+.req{color:var(--red);margin-left:1px}
+
+/* ── Photo ── */
+.photo-btn{margin:8px 12px 12px;border:1.5px dashed var(--bd2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 12px;cursor:pointer;background:var(--bg);min-height:90px;transition:border-color .15s}
+.photo-btn:active{background:#e8f5e8;border-color:var(--green)}
+.photo-btn .pi{font-size:28px}
+.photo-btn .pt{font-size:13px;color:var(--tx2);font-weight:500}
+.photo-btn .ph{font-size:11px;color:var(--tx3)}
+#photo-preview{display:none;width:100%;border-radius:9px;max-height:180px;object-fit:cover}
+.photo-change{text-align:center;padding:6px 0 10px;font-size:12px;color:var(--green);cursor:pointer;font-weight:500}
+
+/* ── Searchable dropdown ── */
+.dd-wrap{padding:8px 12px 12px;position:relative}
+.dd-row{position:relative}
+.dd-in{width:100%;padding:11px 38px 11px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);font-size:15px;color:var(--tx);background:#fafafa;outline:none;font-family:inherit;-webkit-appearance:none}
+.dd-in:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(0,185,0,0.1)}
+.dd-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--tx3);pointer-events:none}
+.dd-list{display:none;position:absolute;left:0;right:0;top:calc(100% + 3px);background:#fff;border:0.5px solid var(--bd2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.13);z-index:999;max-height:210px;overflow-y:auto}
+.dd-list.open{display:block}
+.dd-item{padding:12px 14px;font-size:14px;color:var(--tx);cursor:pointer;border-bottom:0.5px solid var(--bd)}
+.dd-item:last-child{border-bottom:none}
+.dd-item:active,.dd-item:hover{background:var(--green-lt)}
+.dd-item mark{background:#b8f0b8;color:#005500;border-radius:3px;font-style:normal}
+.dd-item.sel{background:var(--green-lt);color:#006600;font-weight:600}
+.dd-empty{padding:14px;text-align:center;font-size:13px;color:var(--tx3)}
+.dd-tag{display:none;margin-top:6px;padding:7px 10px;background:var(--green-lt);border:0.5px solid var(--green-bd);border-radius:8px;font-size:13px;color:#006600;align-items:center;gap:6px}
+.dd-tag.show{display:flex}
+.dd-tag-x{margin-left:auto;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;border-radius:50%;background:rgba(0,0,0,0.06)}
+
+/* ── Native select dropdown ── */
+.sel-wrap{padding:8px 12px 12px}
+.sel-row{position:relative}
+.sel-in{width:100%;padding:11px 38px 11px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);font-size:15px;color:var(--tx);background:#fafafa;outline:none;font-family:inherit;-webkit-appearance:none;appearance:none;cursor:pointer}
+.sel-in:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(0,185,0,0.1)}
+.sel-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--tx3);pointer-events:none}
+
+/* อื่นๆ sub-options */
+.sub-panel{display:none;background:#f5fdf5;border-top:0.5px solid var(--green-bd);padding:10px 12px 12px}
+.sub-panel.show{display:block}
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.sub-chip{padding:10px 8px;border-radius:10px;font-size:13px;color:var(--tx);border:0.5px solid var(--bd2);background:#fff;cursor:pointer;text-align:center;line-height:1.4;font-family:inherit;transition:all .15s;-webkit-appearance:none}
+.sub-chip:active,.sub-chip.active{background:var(--green-lt);border-color:var(--green);color:#006600;font-weight:600}
+.sub-full{grid-column:1/-1}
+.sub-free{margin-top:8px;display:none}
+.sub-free-in{width:100%;padding:10px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);font-size:14px;color:var(--tx);background:#fff;outline:none;font-family:inherit}
+.sub-free-in:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,185,0,0.1)}
+
+/* ── Sector pills (ภาค) ── */
+.pills{padding:8px 12px 12px;display:flex;flex-wrap:wrap;gap:7px}
+.pill{padding:8px 14px;border-radius:20px;font-size:13px;border:0.5px solid var(--bd2);color:var(--tx2);cursor:pointer;background:#fafafa;font-family:inherit;-webkit-appearance:none;transition:all .15s}
+.pill:active,.pill.active{background:var(--green-lt);border-color:var(--green);color:#006600;font-weight:600}
+
+/* ── Error ── */
+.err{font-size:11px;color:var(--red);padding:0 12px 8px;display:none}
+.err.show{display:block}
+
+/* ── Submit ── */
+.submit-wrap{position:fixed;bottom:0;left:0;right:0;padding:10px 12px env(safe-area-inset-bottom,10px);background:rgba(240,242,240,0.95);backdrop-filter:blur(8px);border-top:0.5px solid var(--bd)}
+#submit-btn{width:100%;padding:15px;background:var(--green);color:#fff;border:none;border-radius:var(--ri);font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+#submit-btn:active{background:var(--green-dk)}
+#submit-btn:disabled{background:#b0b0b0;cursor:not-allowed}
+
+/* ── Overlay ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:800;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.overlay.show{display:flex}
+.spin{width:46px;height:46px;border:4px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ov-tx{color:#fff;font-size:14px}
+
+/* ── Toast ── */
+.toast{display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 22px;border-radius:10px;font-size:14px;color:#fff;z-index:900;white-space:nowrap;font-weight:500}
+.toast.show{display:block}
+.toast.ok{background:#00a000}
+.toast.ng{background:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-inner">
+    <div class="hdr-logo">✅</div>
+    <div>
+      <h1>Check-in พนักงาน</h1>
+      <p>บันทึกการเข้างานประจำวัน</p>
+    </div>
+  </div>
+  <div class="date-strip">📅 <span id="live-date">—</span></div>
+</div>
+
+<div class="form">
+
+  <!-- 1. รูปภาพ -->
+  <div class="sec">
+    <div class="sec-hd">📷 รูปภาพ<span class="req">*</span></div>
+    <div class="photo-btn" id="photo-btn" onclick="document.getElementById('photo-input').click()">
+      <div id="photo-ph">
+        <div class="pi">📷</div>
+        <div class="pt">ถ่ายรูป / อัปโหลด</div>
+        <div class="ph">JPG, PNG ไม่เกิน 5MB</div>
+      </div>
+      <img id="photo-preview" alt="preview"/>
+    </div>
+    <div class="photo-change" id="photo-change" style="display:none" onclick="document.getElementById('photo-input').click()">🔄 เปลี่ยนรูป</div>
+    <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)"/>
+    <div class="err" id="err-photo">กรุณาถ่ายหรืออัปโหลดรูปภาพ</div>
+  </div>
+
+  <!-- 2. สาขา BAY -->
+  <div class="sec">
+    <div class="sec-hd">🏦 สาขา BAY<span class="req">*</span></div>
+    <div class="dd-wrap" id="bay-wrap">
+      <div class="dd-row">
+        <input class="dd-in" id="bay-in" type="text" placeholder="ค้นหาสาขา BAY..." autocomplete="off"
+          oninput="filterDD('bay')" onfocus="openDD('bay')"/>
+        <span class="dd-ic">🔍</span>
+      </div>
+      <div class="dd-list" id="bay-list"></div>
+      <div class="dd-tag" id="bay-tag">✅ <span id="bay-tag-tx"></span><span class="dd-tag-x" onclick="clearDD('bay')">✕</span></div>
+    </div>
+    <div class="err" id="err-bay">กรุณาเลือกสาขา BAY</div>
+  </div>
+
+  <!-- 3. สาขาเงินติดล้อ -->
+  <div class="sec">
+    <div class="sec-hd">🏪 สาขาเงินติดล้อ<span class="req">*</span></div>
+    <div class="dd-wrap" id="ngn-wrap">
+      <div class="dd-row">
+        <input class="dd-in" id="ngn-in" type="text" placeholder="ค้นหาสาขาเงินติดล้อ..." autocomplete="off"
+          oninput="filterDD('ngn')" onfocus="openDD('ngn')"/>
+        <span class="dd-ic">🔍</span>
+      </div>
+      <div class="dd-list" id="ngn-list"></div>
+      <div class="dd-tag" id="ngn-tag">✅ <span id="ngn-tag-tx"></span><span class="dd-tag-x" onclick="clearDD('ngn')">✕</span></div>
+    </div>
+    <div class="err" id="err-ngn">กรุณาเลือกสาขาเงินติดล้อ</div>
+  </div>
+
+  <!-- 4. พื้นที่ -->
+  <div class="sec">
+    <div class="sec-hd">📍 พื้นที่<span class="req">*</span></div>
+    <div class="dd-wrap" id="area-wrap">
+      <div class="dd-row">
+        <input class="dd-in" id="area-in" type="text" placeholder="ค้นหาพื้นที่..." autocomplete="off"
+          oninput="filterDD('area')" onfocus="openDD('area')"/>
+        <span class="dd-ic">🔍</span>
+      </div>
+      <div class="dd-list" id="area-list"></div>
+      <div class="dd-tag" id="area-tag">✅ <span id="area-tag-tx"></span><span class="dd-tag-x" onclick="clearDD('area')">✕</span></div>
+    </div>
+    <div class="err" id="err-area">กรุณาเลือกพื้นที่</div>
+  </div>
+
+  <!-- 5. ภาค -->
+  <div class="sec">
+    <div class="sec-hd">🗺️ ภาค<span class="req">*</span></div>
+    <div class="pills" id="sector-pills"></div>
+    <div class="err" id="err-sector">กรุณาเลือกภาค</div>
+  </div>
+
+  <!-- 6. ประเภทกิจกรรม (dropdown) -->
+  <div class="sec">
+    <div class="sec-hd">🎯 ประเภทกิจกรรม<span class="req">*</span></div>
+    <div class="sel-wrap">
+      <div class="sel-row">
+        <select class="sel-in" id="activity-sel" onchange="onActivityChange(this)">
+          <option value="">— เลือกประเภทกิจกรรม —</option>
+          <option value="Morning Talk / Evening Talk">🌅 Morning Talk / Evening Talk</option>
+          <option value="Visit">🤝 Visit</option>
+          <option value="Potential">⭐ Potential</option>
+          <option value="อื่นๆ">➕ อื่นๆ</option>
+        </select>
+        <span class="sel-ic">▼</span>
+      </div>
+    </div>
+    <!-- Sub-panel สำหรับ อื่นๆ -->
+    <div class="sub-panel" id="sub-panel">
+      <div class="sec-hd" style="padding:0 0 6px;font-size:11px">เลือกประเภทย่อย<span class="req">*</span></div>
+      <div class="sub-grid">
+        <button type="button" class="sub-chip" onclick="pickSub(this,'Call Lead')">📞 Call Lead</button>
+        <button type="button" class="sub-chip" onclick="pickSub(this,'ออกบูธ')">🏪 ออกบูธ</button>
+        <button type="button" class="sub-chip sub-full" onclick="pickSub(this,'เข้าพบลูกค้าพร้อม BAY')">🤝 เข้าพบลูกค้าพร้อม BAY</button>
+        <button type="button" class="sub-chip sub-full" onclick="pickSub(this,'อื่นๆ')">✏️ อื่นๆ (ระบุเอง)</button>
+      </div>
+      <div class="sub-free" id="sub-free">
+        <input class="sub-free-in" id="sub-free-in" type="text" placeholder="ระบุรายละเอียด..." oninput="hideErr('activity')"/>
+      </div>
+    </div>
+    <div class="err" id="err-activity">กรุณาเลือกประเภทกิจกรรม</div>
+  </div>
+
+  <!-- 7. เข้าพร้อม (dropdown) -->
+  <div class="sec">
+    <div class="sec-hd">👥 เข้าพร้อม<span class="req">*</span></div>
+    <div class="sel-wrap">
+      <div class="sel-row">
+        <select class="sel-in" id="accompany-sel" onchange="onAccompanyChange(this)">
+          <option value="">— เลือกผู้ร่วมเข้า —</option>
+          <option value="GRM">👔 GRM</option>
+          <option value="Area Manager">🗂️ Area Manager</option>
+          <option value="RCS">🔑 RCS</option>
+        </select>
+        <span class="sel-ic">▼</span>
+      </div>
+    </div>
+    <div class="err" id="err-accompany">กรุณาเลือกผู้ร่วมเข้า</div>
+  </div>
+
+</div><!-- /form -->
+
+<!-- Submit bar -->
+<div class="submit-wrap">
+  <button id="submit-btn" onclick="submitForm()">✅ ยืนยัน Check-in</button>
+</div>
+
+<!-- Overlay loading -->
+<div class="overlay" id="loading">
+  <div class="spin"></div>
+  <div class="ov-tx">กำลังบันทึกข้อมูล...</div>
+</div>
+
+<!-- Toasts -->
+<div class="toast ok" id="t-ok">✅ Check-in สำเร็จ!</div>
+<div class="toast ng" id="t-ng">❌ เกิดข้อผิดพลาด ลองใหม่อีกครั้ง</div>
+
+<script>
+// ═══════════════════════════════════════
+//  CONFIG — แก้ไขตรงนี้
+// ═══════════════════════════════════════
+const GAS_URL = 'YOUR_WEB_APP_URL';
+const LIFF_ID = 'YOUR_LIFF_ID';
+
+// ═══════════════════════════════════════
+//  State
+// ═══════════════════════════════════════
+const masters = { bay:[], ngn:[], area:[], sectors:[] };
+const chosen  = { bay:null, ngn:null, area:null, sector:null, activity:null, subActivity:null, accompany:null };
+let photoBase64 = null;
+let lineProfile = { userId:'', displayName:'' };
+
+// ═══════════════════════════════════════
+//  Init
+// ═══════════════════════════════════════
+window.addEventListener('load', async () => {
+  tick(); setInterval(tick, 30000);
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (liff.isLoggedIn()) {
+      const p = await liff.getProfile();
+      lineProfile = { userId: p.userId, displayName: p.displayName };
+    } else { liff.login(); }
+  } catch(e){ console.warn('LIFF:', e); }
+  await loadMasters();
+});
+
+function tick() {
+  const now = new Date();
+  const opts = { weekday:'short', year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Bangkok' };
+  document.getElementById('live-date').textContent = now.toLocaleDateString('th-TH', opts);
+}
+
+// ═══════════════════════════════════════
+//  Masters
+// ═══════════════════════════════════════
+async function loadMasters() {
+  try {
+    const r = await fetch(`${GAS_URL}?action=getMasters`);
+    const d = await r.json();
+    if (d.status === 'ok') {
+      masters.bay    = d.bay.map(x=>x.name);
+      masters.ngn    = d.ngn.map(x=>x.name);
+      masters.area   = d.area.map(x=>x.name);
+      const rgns     = [...new Set(d.ngn.map(x=>x.region).filter(Boolean))];
+      masters.sectors = rgns.length ? rgns : ['ภาคเหนือ','ภาคใต้','ภาคตะวันออก','ภาคตะวันตก','ภาคกลาง','ภาคอีสาน'];
+    }
+  } catch(_) {
+    masters.bay     = ['BAY สยามพารากอน','BAY เซ็นทรัลเวิลด์','BAY ลาดพร้าว','BAY บางนา','BAY รัชดา','BAY พระราม 9'];
+    masters.ngn     = ['เงินติดล้อ พระราม 4','เงินติดล้อ รังสิต','เงินติดล้อ เชียงใหม่','เงินติดล้อ ขอนแก่น'];
+    masters.area    = ['กรุงเทพและปริมณฑล','ภาคเหนือตอนบน','ภาคอีสาน','ภาคใต้'];
+    masters.sectors = ['ภาคเหนือ','ภาคใต้','ภาคตะวันออก','ภาคตะวันตก','ภาคกลาง','ภาคอีสาน'];
+  }
+  renderPills();
+}
+
+function renderPills() {
+  document.getElementById('sector-pills').innerHTML =
+    masters.sectors.map(s=>`<button type="button" class="pill" onclick="pickPill(this,'${s}')">${s}</button>`).join('');
+}
+
+// ═══════════════════════════════════════
+//  Photo
+// ═══════════════════════════════════════
+function handlePhoto(input) {
+  const f = input.files[0]; if (!f) return;
+  if (f.size > 5*1024*1024) { alert('ไฟล์ใหญ่เกิน 5MB'); return; }
+  const r = new FileReader();
+  r.onload = e => {
+    photoBase64 = e.target.result;
+    const img = document.getElementById('photo-preview');
+    img.src = photoBase64; img.style.display = 'block';
+    document.getElementById('photo-ph').style.display = 'none';
+    document.getElementById('photo-change').style.display = 'block';
+    hideErr('photo');
+  };
+  r.readAsDataURL(f);
+}
+
+// ═══════════════════════════════════════
+//  Searchable Dropdown
+// ═══════════════════════════════════════
+document.addEventListener('click', e => {
+  ['bay','ngn','area'].forEach(k => {
+    const w = document.getElementById(k+'-wrap');
+    if (w && !w.contains(e.target)) document.getElementById(k+'-list').classList.remove('open');
+  });
+});
+
+function openDD(k) { filterDD(k); document.getElementById(k+'-list').classList.add('open'); }
+
+function filterDD(k) {
+  const q = document.getElementById(k+'-in').value.toLowerCase().trim();
+  const list = document.getElementById(k+'-list');
+  const hits = q ? masters[k].filter(x=>x.toLowerCase().includes(q)) : masters[k];
+  if (!hits.length) {
+    list.innerHTML = '<div class="dd-empty">ไม่พบข้อมูล</div>';
+  } else {
+    const esc = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    list.innerHTML = hits.map(x=>{
+      const hl = q ? x.replace(new RegExp(`(${esc})`,'gi'),'<mark>$1</mark>') : x;
+      return `<div class="dd-item${chosen[k]===x?' sel':''}" onclick="pickDD('${k}','${x.replace(/'/g,"\\'")}')"> ${hl}</div>`;
+    }).join('');
+  }
+  list.classList.add('open');
+}
+
+function pickDD(k, val) {
+  chosen[k] = val;
+  document.getElementById(k+'-in').value = val;
+  document.getElementById(k+'-list').classList.remove('open');
+  document.getElementById(k+'-tag-tx').textContent = val;
+  document.getElementById(k+'-tag').classList.add('show');
+  hideErr(k);
+}
+
+function clearDD(k) {
+  chosen[k] = null;
+  document.getElementById(k+'-in').value = '';
+  document.getElementById(k+'-tag').classList.remove('show');
+}
+
+// ═══════════════════════════════════════
+//  Sector pills
+// ═══════════════════════════════════════
+function pickPill(el, val) {
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  chosen.sector = val; hideErr('sector');
+}
+
+// ═══════════════════════════════════════
+//  Activity dropdown + sub-options
+// ═══════════════════════════════════════
+function onActivityChange(sel) {
+  const val = sel.value;
+  chosen.activity = val || null;
+  chosen.subActivity = null;
+  hideErr('activity');
+  const panel = document.getElementById('sub-panel');
+  const free  = document.getElementById('sub-free');
+  if (val === 'อื่นๆ') {
+    panel.classList.add('show');
+    document.querySelectorAll('.sub-chip').forEach(c=>c.classList.remove('active'));
+    free.style.display = 'none';
+    document.getElementById('sub-free-in').value = '';
+  } else {
+    panel.classList.remove('show');
+    free.style.display = 'none';
+  }
+}
+
+function pickSub(el, val) {
+  document.querySelectorAll('.sub-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  chosen.subActivity = val; hideErr('activity');
+  const free = document.getElementById('sub-free');
+  if (val === 'อื่นๆ') { free.style.display = 'block'; document.getElementById('sub-free-in').focus(); }
+  else { free.style.display = 'none'; document.getElementById('sub-free-in').value = ''; }
+}
+
+function getActivity() {
+  if (chosen.activity !== 'อื่นๆ') return chosen.activity;
+  if (!chosen.subActivity) return null;
+  if (chosen.subActivity === 'อื่นๆ') {
+    const t = document.getElementById('sub-free-in').value.trim();
+    return t ? `อื่นๆ: ${t}` : null;
+  }
+  return chosen.subActivity;
+}
+
+// ═══════════════════════════════════════
+//  Accompany dropdown
+// ═══════════════════════════════════════
+function onAccompanyChange(sel) {
+  chosen.accompany = sel.value || null;
+  hideErr('accompany');
+}
+
+// ═══════════════════════════════════════
+//  Validation
+// ═══════════════════════════════════════
+function showErr(k){ document.getElementById('err-'+k).classList.add('show'); }
+function hideErr(k){ document.getElementById('err-'+k).classList.remove('show'); }
+
+function validate() {
+  let ok = true;
+  const checks = [
+    [!photoBase64,       'photo'],
+    [!chosen.bay,        'bay'],
+    [!chosen.ngn,        'ngn'],
+    [!chosen.area,       'area'],
+    [!chosen.sector,     'sector'],
+    [!getActivity(),     'activity'],
+    [!chosen.accompany,  'accompany'],
+  ];
+  checks.forEach(([fail, key]) => { if (fail) { showErr(key); ok = false; } });
+  if (!ok) {
+    const firstErr = document.querySelector('.err.show');
+    if (firstErr) firstErr.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  return ok;
+}
+
+// ═══════════════════════════════════════
+//  Submit
+// ═══════════════════════════════════════
+async function submitForm() {
+  if (!validate()) return;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('submit-btn').disabled = true;
+
+  const actVal = getActivity();
+  const payload = {
+    action: 'checkIn',
+    lineUserId:   lineProfile.userId,
+    lineUserName: lineProfile.displayName,
+    bay:          chosen.bay,
+    ngn:          chosen.ngn,
+    area:         chosen.area,
+    sector:       chosen.sector,
+    activity:     actVal,
+    accompany:    chosen.accompany,
+    imageBase64:  photoBase64
+  };
+
+  try {
+    const res  = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    document.getElementById('loading').classList.remove('show');
+
+    if (data.status === 'ok') {
+      showToast('ok');
+      if (liff.isInClient()) {
+        try {
+          await liff.sendMessages([{
+            type:'flex', altText:`Check-in สำเร็จ ${data.date} ${data.time}`,
+            contents:{ type:'bubble', body:{ type:'box', layout:'vertical', spacing:'sm', contents:[
+              { type:'text', text:'✅ Check-in สำเร็จ!', weight:'bold', size:'xl', color:'#00B900' },
+              { type:'text', text:`${data.date}  ${data.time}`, size:'sm', color:'#888' },
+              { type:'separator' },
+              { type:'text', text:`สาขา BAY: ${chosen.bay}`, size:'sm' },
+              { type:'text', text:`สาขาเงินติดล้อ: ${chosen.ngn}`, size:'sm' },
+              { type:'text', text:`พื้นที่: ${chosen.area} | ภาค: ${chosen.sector}`, size:'sm' },
+              { type:'text', text:`กิจกรรม: ${actVal}`, size:'sm', color:'#00B900', weight:'bold' },
+              { type:'text', text:`เข้าพร้อม: ${chosen.accompany}`, size:'sm' }
+            ]}}
+          }]);
+        } catch(_) {}
+        setTimeout(()=>liff.closeWindow(), 1500);
+      }
+      resetForm();
+    } else { throw new Error(data.message); }
+  } catch(err) {
+    document.getElementById('loading').classList.remove('show');
+    showToast('ng');
+    console.error(err);
+  }
+  document.getElementById('submit-btn').disabled = false;
+}
+
+// ═══════════════════════════════════════
+//  Reset
+// ═══════════════════════════════════════
+function resetForm() {
+  photoBase64 = null;
+  document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('photo-ph').style.display = 'block';
+  document.getElementById('photo-change').style.display = 'none';
+  document.getElementById('photo-input').value = '';
+  ['bay','ngn','area'].forEach(k=>clearDD(k));
+  chosen.sector = null; chosen.activity = null; chosen.subActivity = null; chosen.accompany = null;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('activity-sel').value = '';
+  document.getElementById('accompany-sel').value = '';
+  document.getElementById('sub-panel').classList.remove('show');
+  document.getElementById('sub-free').style.display = 'none';
+  document.getElementById('sub-free-in').value = '';
+  document.querySelectorAll('.sub-chip').forEach(c=>c.classList.remove('active'));
+}
+
+function showToast(t) {
+  const el = document.getElementById('t-'+t);
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
