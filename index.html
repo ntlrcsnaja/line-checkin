@@ -256,6 +256,8 @@ let lineProfile = { userId:'', displayName:'' };
 // ── Init ──
 window.addEventListener('load', async () => {
   tick(); setInterval(tick, 30000);
+  // โหลดข้อมูลสาขาก่อน ไม่รอ LIFF
+  loadMasters();
   try {
     await liff.init({ liffId: LIFF_ID });
     if (liff.isLoggedIn()) {
@@ -263,7 +265,6 @@ window.addEventListener('load', async () => {
       lineProfile = { userId: p.userId, displayName: p.displayName };
     } else { liff.login(); }
   } catch(e){ console.warn('LIFF:', e); }
-  await loadMasters();
 });
 
 function tick() {
