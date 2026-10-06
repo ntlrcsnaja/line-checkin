@@ -71,6 +71,14 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
 
 
 
+/* Checkbox multi-select */
+.chk-wrap{padding:8px 12px 12px;display:flex;flex-direction:column;gap:6px}
+.chk-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);cursor:pointer;font-size:15px;color:var(--tx);background:#fafafa;transition:all .15s;user-select:none}
+.chk-item:active{background:var(--gl)}
+.chk-item.checked{background:var(--gl);border-color:var(--gb);color:#006600;font-weight:500}
+.chk-box{font-size:18px;flex-shrink:0;color:var(--t3)}
+.chk-item.checked .chk-box{color:#00B900}
+
 /* Autofill read-only field */
 .af-field{padding:11px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);font-size:15px;color:var(--t3);background:#f5f5f5}
 .af-field.filled{background:var(--gl);border-color:var(--gb);color:#006600;font-weight:500}
@@ -200,19 +208,25 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
   <!-- 5. เข้าพร้อม -->
   <div class="sec">
     <div class="sec-hd">👥 เข้าพร้อม<span class="req">*</span></div>
-    <div class="sel-wrap">
-      <div class="sel-row">
-        <select class="sel-in" id="accompany-sel" onchange="chosen.accompany=this.value||null;hideErr('accompany')">
-          <option value="">— เลือกผู้ร่วมเข้า —</option>
-          <option value="เข้าคนเดียว">เข้าคนเดียว</option>
-          <option value="GRM">GRM</option>
-          <option value="AM">AM</option>
-          <option value="RCS">RCS</option>
-        </select>
-        <span class="sel-ic">▼</span>
-      </div>
+    <div class="chk-wrap">
+      <label class="chk-item" onclick="toggleAccompany('เข้าคนเดียว',this)">
+        <div class="chk-box" id="chk-เข้าคนเดียว">☐</div>
+        <span>เข้าคนเดียว</span>
+      </label>
+      <label class="chk-item" onclick="toggleAccompany('GRM',this)">
+        <div class="chk-box" id="chk-GRM">☐</div>
+        <span>GRM</span>
+      </label>
+      <label class="chk-item" onclick="toggleAccompany('AM',this)">
+        <div class="chk-box" id="chk-AM">☐</div>
+        <span>AM</span>
+      </label>
+      <label class="chk-item" onclick="toggleAccompany('RCS',this)">
+        <div class="chk-box" id="chk-RCS">☐</div>
+        <span>RCS</span>
+      </label>
     </div>
-    <div class="err" id="err-accompany">กรุณาเลือกผู้ร่วมเข้า</div>
+    <div class="err" id="err-accompany">กรุณาเลือกผู้ร่วมเข้าอย่างน้อย 1 คน</div>
   </div>
 
 </div>
@@ -230,12 +244,12 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
 <div class="toast ng" id="t-ng">❌ เกิดข้อผิดพลาด ลองใหม่อีกครั้ง</div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzlo3SQYVCpU2b-6-uUYd_DIluALudvXteXMll8TiweAPculnhmuw13FEjLdg6a-JwJ0w/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzKwQlu9ufYuD3x1iq61gaaczxHx_eP9udfzgG4vIvuQzzFPXagEF_hnSmtfTkvwUfkpg/exec';
 const LIFF_ID = '2011871894-qTJSFRVJ';
 
 const masters = { bay:[] };
 const mapping = {}; // bayName → { ngn, area, sector }
-const chosen  = { bay:null, ngn:null, area:null, sector:null, activity:null, subActivity:null, accompany:null };
+const chosen  = { bay:null, ngn:null, area:null, sector:null, activity:null, subActivity:null, accompany:[] };
 let photoBase64 = null;
 let lineProfile = { userId:'', displayName:'' };
 
@@ -393,6 +407,21 @@ function getActivity() {
   return chosen.subActivity;
 }
 
+// ── Accompany ──
+function toggleAccompany(val, el) {
+  const idx = chosen.accompany.indexOf(val);
+  if (idx === -1) {
+    chosen.accompany.push(val);
+    el.classList.add('checked');
+    document.getElementById('chk-'+val).textContent = '☑';
+  } else {
+    chosen.accompany.splice(idx, 1);
+    el.classList.remove('checked');
+    document.getElementById('chk-'+val).textContent = '☐';
+  }
+  hideErr('accompany');
+}
+
 // ── Validate ──
 function showErr(k){ document.getElementById('err-'+k).classList.add('show'); }
 function hideErr(k){ document.getElementById('err-'+k).classList.remove('show'); }
@@ -403,7 +432,7 @@ function validate() {
     [!photoBase64,      'photo'],
     [!chosen.bay,       'bay'],
     [!getActivity(),    'activity'],
-    [!chosen.accompany, 'accompany'],
+    [chosen.accompany.length === 0, 'accompany'],
   ];
   checks.forEach(([fail, key]) => { if (fail) { showErr(key); ok = false; } });
   if (!ok) {
@@ -429,7 +458,7 @@ async function submitForm() {
     area:         chosen.area,
     sector:       chosen.sector,
     activity:     actVal,
-    accompany:    chosen.accompany,
+    accompany:    chosen.accompany.join(', '),
     imageBase64:  photoBase64
   };
 
@@ -476,9 +505,13 @@ function resetForm() {
   document.getElementById('photo-change').style.display = 'none';
   document.getElementById('photo-input').value = '';
   clearBAY();
-  chosen.activity = chosen.subActivity = chosen.accompany = null;
+  chosen.activity = chosen.subActivity = null;
+  chosen.accompany = [];
   document.getElementById('activity-sel').value = '';
-  document.getElementById('accompany-sel').value = '';
+  ['เข้าคนเดียว','GRM','AM','RCS'].forEach(v => {
+    document.getElementById('chk-'+v).textContent = '☐';
+    document.getElementById('chk-'+v).closest('.chk-item').classList.remove('checked');
+  });
   document.getElementById('sub-panel').classList.remove('show');
   document.getElementById('sub-free').style.display = 'none';
   document.getElementById('sub-free-in').value = '';
