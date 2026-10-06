@@ -244,7 +244,7 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
 <div class="toast ng" id="t-ng">❌ เกิดข้อผิดพลาด ลองใหม่อีกครั้ง</div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzzYMx8N_E90bMOdtdF7nTHFbZvLvzAOCXBU7VZclJ8dSno3Pl8PiG7XdoP8v3HIqXZ1Q/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbz6T9TYIHj8u3NH7tUEYNKNC3LkrmeJc0LLvGjm2FWyGdAIjF3Cd1n7pOOJyA6fs-NBCQ/exec';
 const LIFF_ID = '2011871894-qTJSFRVJ';
 
 const masters = { bay:[] };
@@ -273,16 +273,13 @@ function tick() {
     { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Bangkok' });
 }
 
-// ── Masters ──
-async function loadMasters() {
-  // แสดง Loading ใน input
+// ── Masters (JSONP - bypass CORS) ──
+function loadMasters() {
   const bayIn = document.getElementById('bay-in');
   bayIn.placeholder = '⏳ กำลังโหลดข้อมูลสาขา...';
   bayIn.disabled = true;
 
-  try {
-    const r = await fetch(`${GAS_URL}?action=getMasters`);
-    const d = await r.json();
+  window._onMastersLoaded = function(d) {
     if (d.status === 'ok') {
       masters.bay = d.bay.map(x => x.name);
       d.bay.forEach(b => {
@@ -290,13 +287,21 @@ async function loadMasters() {
         if (n) mapping[b.name] = { ngn: n.name, area: n.area, sector: n.region };
       });
     }
-  } catch(_) { masters.bay = []; }
+    bayIn.disabled = false;
+    bayIn.placeholder = masters.bay.length > 0
+      ? `ค้นหาสาขา BAY... (${masters.bay.length} สาขา)`
+      : 'ค้นหาสาขา BAY...';
+    document.getElementById('jsonp-script')?.remove();
+  };
 
-  // พร้อมใช้งานแล้ว
-  bayIn.disabled = false;
-  bayIn.placeholder = masters.bay.length > 0
-    ? `ค้นหาสาขา BAY... (${masters.bay.length} สาขา)`
-    : 'ค้นหาสาขา BAY...';
+  const s = document.createElement('script');
+  s.id = 'jsonp-script';
+  s.src = `${GAS_URL}?action=getMasters&callback=_onMastersLoaded`;
+  s.onerror = () => {
+    bayIn.disabled = false;
+    bayIn.placeholder = 'ค้นหาสาขา BAY...';
+  };
+  document.head.appendChild(s);
 }
 
 // ── Photo ──
