@@ -132,7 +132,7 @@
 </div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyW9mts-S0mUU6EtXMHjFaMbmhHALWcsqTyWgmxpDnVDm1RMleAz5kOKADWIEnwBUAbQw/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxigZ_NzQ4WzXRnHbY7fnxKkTfTYXUhs4_ZuBlDGF_zr2_74oA8YtVb2WW4nnxVCPvHng/exec';
 
 const parsedData = { bay: null, ngn: null, area: null };
 const sheetMap   = { bay: 'MasterBAY', ngn: 'MasterNGN', area: 'MasterArea' };
@@ -184,12 +184,16 @@ async function uploadToGAS(key) {
   btn.textContent = '⏳ กำลังอัปโหลด...';
 
   try {
-    const res  = await fetch(GAS_URL, {
+    const payload = JSON.stringify({ action: 'uploadMaster', sheetName: sheetMap[key], rows: parsedData[key] });
+    const form = new FormData();
+    form.append('data', payload);
+
+    const res = await fetch(GAS_URL.replace('?',''), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'uploadMaster', sheetName: sheetMap[key], rows: parsedData[key] })
+      body: new URLSearchParams({ data: payload })
     });
-    const data = await res.json();
+    const text = await res.text();
+    const data = JSON.parse(text);
     if (data.status === 'ok') {
       document.getElementById('status-'+key).textContent = `✅ อัปโหลดสำเร็จ ${data.count} รายการ`;
       document.getElementById('status-'+key).className = 'status ok';
