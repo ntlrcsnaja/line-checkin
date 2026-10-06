@@ -274,18 +274,28 @@ function tick() {
 
 // ── Masters ──
 async function loadMasters() {
+  // แสดง Loading ใน input
+  const bayIn = document.getElementById('bay-in');
+  bayIn.placeholder = '⏳ กำลังโหลดข้อมูลสาขา...';
+  bayIn.disabled = true;
+
   try {
     const r = await fetch(`${GAS_URL}?action=getMasters`);
     const d = await r.json();
     if (d.status === 'ok') {
       masters.bay = d.bay.map(x => x.name);
-      // สร้าง mapping: bay name → ngn/area/sector
       d.bay.forEach(b => {
         const n = d.ngn.find(x => x.code === b.code);
         if (n) mapping[b.name] = { ngn: n.name, area: n.area, sector: n.region };
       });
     }
   } catch(_) { masters.bay = []; }
+
+  // พร้อมใช้งานแล้ว
+  bayIn.disabled = false;
+  bayIn.placeholder = masters.bay.length > 0
+    ? `ค้นหาสาขา BAY... (${masters.bay.length} สาขา)`
+    : 'ค้นหาสาขา BAY...';
 }
 
 // ── Photo ──
@@ -299,14 +309,14 @@ function handlePhoto(input) {
       // Compress ลดขนาดไม่เกิน 800px และ quality 70%
       const canvas = document.createElement('canvas');
       let w = img2.width, h = img2.height;
-      const max = 800;
+      const max = 600;
       if (w > max || h > max) {
         if (w > h) { h = Math.round(h * max / w); w = max; }
         else { w = Math.round(w * max / h); h = max; }
       }
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img2, 0, 0, w, h);
-      photoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+      photoBase64 = canvas.toDataURL('image/jpeg', 0.5);
       const preview = document.getElementById('photo-preview');
       preview.src = photoBase64; preview.style.display = 'block';
       document.getElementById('photo-ph').style.display = 'none';
@@ -472,7 +482,8 @@ async function submitForm() {
     area:         chosen.area,
     sector:       chosen.sector,
     activity:     actVal,
-    accompany:    chosen.accompany.join(', ')
+    accompany:    chosen.accompany.join(', '),
+    imageBase64:  photoBase64
   };
 
   try {
