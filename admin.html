@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — จัดการข้อมูล Master</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',system-ui,sans-serif;background:#f0f2f5;min-height:100vh}
+.top{background:#1565c0;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px}
+.top h1{font-size:17px;font-weight:600}
+.top p{font-size:11px;opacity:.8;margin-top:2px}
+.wrap{max-width:680px;margin:20px auto;padding:0 16px 40px}
+
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.stat{background:#fff;border-radius:12px;border:0.5px solid #ddd;padding:16px;text-align:center}
+.stat .n{font-size:30px;font-weight:700;color:#00B900}
+.stat .l{font-size:12px;color:#666;margin-top:2px}
+
+.card{background:#fff;border-radius:12px;border:0.5px solid #ddd;padding:20px;margin-bottom:14px}
+.card h2{font-size:15px;font-weight:600;color:#222;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+
+.desc{font-size:12px;color:#555;background:#f5f8ff;border:0.5px solid #c5d8ff;border-radius:8px;padding:10px 14px;margin-bottom:14px;line-height:1.9}
+.col{display:inline-block;background:#1565c0;color:#fff;border-radius:4px;padding:1px 8px;font-size:11px;font-family:monospace;margin:2px 2px 2px 0}
+
+.zone{border:2px dashed #ccc;border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:#fafafa;transition:border-color .2s;margin-bottom:10px}
+.zone:hover{border-color:#00B900}
+.zone input{display:none}
+.zone .zi{font-size:30px;margin-bottom:6px}
+.zone .zt{font-size:13px;color:#555;font-weight:500}
+.zone .zh{font-size:11px;color:#aaa;margin-top:3px}
+
+.status{font-size:13px;min-height:18px;margin:6px 0}
+.status.ok{color:#00B900;font-weight:500}
+.status.err{color:#e53935}
+
+.prev-wrap{overflow-x:auto;margin:8px 0}
+table.prev{width:100%;border-collapse:collapse;font-size:12px;min-width:400px}
+table.prev th{background:#1565c0;color:#fff;padding:7px 10px;text-align:left;white-space:nowrap}
+table.prev td{padding:6px 10px;border-bottom:0.5px solid #eee}
+table.prev tr:nth-child(even) td{background:#f5f8ff}
+.row-count{font-size:11px;color:#888;margin-top:4px}
+
+.btn-up{width:100%;padding:13px;background:#00B900;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;display:none;margin-top:8px}
+.btn-up:disabled{background:#aaa;cursor:not-allowed}
+.btn-up:active{background:#009900}
+
+.btn-tpl{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:13px;color:#1565c0;cursor:pointer;background:none;border:none;font-family:inherit;padding:4px 0;text-decoration:underline}
+
+.info{background:#e3f2fd;border:0.5px solid #90caf9;border-radius:10px;padding:14px 16px;font-size:13px;color:#1565c0;line-height:1.9}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span style="font-size:22px">⚙️</span>
+  <div>
+    <h1>Admin — จัดการข้อมูล Master</h1>
+    <p>อัปโหลดข้อมูล Mapping สาขาผ่านไฟล์ Excel</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="stat-row">
+    <div class="stat"><div class="n" id="cnt-bay">—</div><div class="l">สาขา BAY</div></div>
+    <div class="stat"><div class="n" id="cnt-ngn">—</div><div class="l">สาขาเงินติดล้อ</div></div>
+  </div>
+
+  <div class="card">
+    <h2>📊 อัปโหลดข้อมูล Mapping สาขา</h2>
+    <div class="desc">
+      ไฟล์ Excel ต้องมีคอลัมน์ตามลำดับนี้:<br>
+      <span class="col">A: รหัสสาขา BAY</span>
+      <span class="col">B: ชื่อสาขา BAY</span>
+      <span class="col">C: ชื่อสาขาเงินติดล้อ</span>
+      <span class="col">D: พื้นที่</span>
+      <span class="col">E: ภาค</span><br><br>
+      เมื่อพนักงานเลือก <b>สาขา BAY</b> ระบบจะ Auto-fill ข้อมูลอื่นให้อัตโนมัติ
+    </div>
+
+    <label class="zone">
+      <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFile(this)"/>
+      <div class="zi">📂</div>
+      <div class="zt">คลิกหรือลากไฟล์มาวางที่นี่</div>
+      <div class="zh">รองรับ .xlsx .xls .csv</div>
+    </label>
+
+    <div class="status" id="status-main"></div>
+    <div id="preview-main"></div>
+    <button class="btn-up" id="btn-main" onclick="uploadAll()">⬆️ อัปโหลดไปยัง Google Sheet</button>
+    <button class="btn-tpl" onclick="downloadTemplate()">⬇️ ดาวน์โหลด Template ตัวอย่าง</button>
+  </div>
+
+  <div class="card">
+    <div class="info">
+      <b>📌 ขั้นตอนการใช้งาน</b><br>
+      1. กด <b>ดาวน์โหลด Template</b> เพื่อดูรูปแบบไฟล์<br>
+      2. กรอกข้อมูลสาขาให้ครบทุกคอลัมน์<br>
+      3. ลากไฟล์มาวาง หรือคลิกเพื่อเลือกไฟล์<br>
+      4. ตรวจสอบ Preview แล้วกด <b>อัปโหลด</b><br>
+      5. ระบบจะอัปเดต Dropdown ใน Check-in ทันที
+    </div>
+  </div>
+
+</div>
+
+<script>
+let parsedRows = null;
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb   = XLSX.read(e.target.result, { type:'binary' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const all  = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+      const data = all.slice(1).filter(r => r.some(c => c !== ''));
+      parsedRows = data;
+
+      const st = document.getElementById('status-main');
+      st.textContent = `✅ พบข้อมูล ${data.length} แถว — ตรวจสอบ Preview แล้วกดอัปโหลด`;
+      st.className = 'status ok';
+
+      const headers = all[0] || ['รหัสสาขา BAY','ชื่อสาขา BAY','ชื่อสาขาเงินติดล้อ','พื้นที่','ภาค'];
+      const preview = data.slice(0, 5);
+      document.getElementById('preview-main').innerHTML = `
+        <div class="prev-wrap">
+          <table class="prev">
+            <tr>${headers.slice(0,5).map(h=>`<th>${h||'—'}</th>`).join('')}</tr>
+            ${preview.map(r=>`<tr>${r.slice(0,5).map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
+          </table>
+        </div>
+        <div class="row-count">แสดง ${preview.length} จาก ${data.length} แถว</div>`;
+
+      document.getElementById('btn-main').style.display = 'block';
+    } catch(err) {
+      const st = document.getElementById('status-main');
+      st.textContent = '❌ อ่านไฟล์ไม่ได้: ' + err.message;
+      st.className = 'status err';
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function uploadAll() {
+  if (!parsedRows) return;
+  const btn = document.getElementById('btn-main');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังอัปโหลด...';
+
+  const bayRows  = parsedRows.map(r => [r[0], r[1]]);
+  const ngnRows  = parsedRows.map(r => [r[0], r[2], r[3], r[4]]);
+  const areaMap  = new Map();
+  parsedRows.forEach(r => { if (r[3]) areaMap.set(r[3], [r[3], r[4]]); });
+  const areaRows = [...areaMap.values()];
+
+  let done = 0;
+  const total = 3;
+
+  function next(sheetName, rows) {
+    google.script.run
+      .withSuccessHandler(res => {
+        const r = JSON.parse(res);
+        done++;
+        if (done === total) {
+          const st = document.getElementById('status-main');
+          st.textContent = `✅ อัปโหลดสำเร็จ ${parsedRows.length} สาขา`;
+          st.className = 'status ok';
+          btn.disabled = false;
+          btn.textContent = '⬆️ อัปโหลดไปยัง Google Sheet';
+          loadCounts();
+        }
+      })
+      .withFailureHandler(err => {
+        const st = document.getElementById('status-main');
+        st.textContent = '❌ Error: ' + err.message;
+        st.className = 'status err';
+        btn.disabled = false;
+        btn.textContent = '⬆️ อัปโหลดไปยัง Google Sheet';
+      })
+      .uploadMasterFromAdmin(JSON.stringify({ action:'uploadMaster', sheetName, rows }));
+  }
+
+  next('MasterBAY',  bayRows);
+  next('MasterNGN',  ngnRows);
+  next('MasterArea', areaRows);
+}
+
+function downloadTemplate() {
+  const data = [
+    ['รหัสสาขา BAY','ชื่อสาขา BAY','ชื่อสาขาเงินติดล้อ','พื้นที่','ภาค'],
+    ['BAY001','BAY สยามพารากอน','เงินติดล้อ พระราม 4','กรุงเทพใต้','A-BS'],
+    ['BAY002','BAY ลาดพร้าว','เงินติดล้อ รังสิต','กรุงเทพเหนือ','A-BN'],
+    ['BAY003','BAY เชียงใหม่','เงินติดล้อ เชียงใหม่','เชียงใหม่','NO'],
+    ['BAY004','BAY ขอนแก่น','เงินติดล้อ ขอนแก่น','ขอนแก่น','EN'],
+  ];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:16},{wch:22},{wch:26},{wch:20},{wch:8}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Mapping');
+  XLSX.writeFile(wb, 'template_mapping.xlsx');
+}
+
+function loadCounts() {
+  google.script.run
+    .withSuccessHandler(res => {
+      const d = JSON.parse(res);
+      document.getElementById('cnt-bay').textContent = d.bay || 0;
+      document.getElementById('cnt-ngn').textContent = d.ngn || 0;
+    })
+    .getCountsForAdmin();
+}
+
+loadCounts();
+</script>
+</body>
+</html>
