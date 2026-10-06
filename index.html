@@ -6,109 +6,93 @@
 <title>Check-in</title>
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <style>
-:root {
-  --green: #00B900;
-  --green-dk: #009900;
-  --green-lt: #e6f9e6;
-  --green-bd: #99d499;
-  --bg: #f0f2f0;
-  --white: #ffffff;
-  --tx: #1a1a1a;
-  --tx2: #666666;
-  --tx3: #aaaaaa;
-  --bd: #e0e0e0;
-  --bd2: #c8c8c8;
-  --red: #e53935;
-  --r: 14px;
-  --ri: 10px;
-}
+:root{--g:#00B900;--gd:#009900;--gl:#e6f9e6;--gb:#99d499;--bg:#f0f2f0;--w:#fff;--tx:#1a1a1a;--t2:#666;--t3:#aaa;--bd:#e0e0e0;--bd2:#c8c8c8;--red:#e53935;--r:14px;--ri:10px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:15px;line-height:1.5}
 
-/* ── Header ── */
-.hdr{background:var(--green);padding:env(safe-area-inset-top,0) 0 0;position:sticky;top:0;z-index:100}
+.hdr{background:var(--g);padding:env(safe-area-inset-top,0) 0 0;position:sticky;top:0;z-index:100}
 .hdr-inner{display:flex;align-items:center;gap:10px;padding:12px 16px}
 .hdr-logo{width:34px;height:34px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
 .hdr h1{color:#fff;font-size:15px;font-weight:700;line-height:1.2}
 .hdr p{color:rgba(255,255,255,0.8);font-size:11px}
 .date-strip{background:rgba(0,0,0,0.15);padding:6px 16px;font-size:12px;color:#fff;display:flex;align-items:center;gap:5px}
 
-/* ── Form body ── */
 .form{padding:12px;display:flex;flex-direction:column;gap:10px;padding-bottom:100px}
 
-/* ── Section card ── */
-.sec{background:var(--white);border-radius:var(--r);border:0.5px solid var(--bd);overflow:visible}
-.sec-hd{padding:10px 14px 0;font-size:11px;font-weight:700;color:var(--tx2);letter-spacing:0.3px;display:flex;align-items:center;gap:5px}
+/* Card */
+.sec{background:var(--w);border-radius:var(--r);border:0.5px solid var(--bd);overflow:visible}
+.sec-hd{padding:10px 14px 0;font-size:11px;font-weight:700;color:var(--t2);letter-spacing:0.3px;display:flex;align-items:center;gap:5px}
 .req{color:var(--red);margin-left:1px}
 
-/* ── Photo ── */
+/* Photo */
 .photo-btn{margin:8px 12px 12px;border:1.5px dashed var(--bd2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 12px;cursor:pointer;background:var(--bg);min-height:90px;transition:border-color .15s}
-.photo-btn:active{background:#e8f5e8;border-color:var(--green)}
+.photo-btn:active{background:#e8f5e8;border-color:var(--g)}
 .photo-btn .pi{font-size:28px}
-.photo-btn .pt{font-size:13px;color:var(--tx2);font-weight:500}
-.photo-btn .ph{font-size:11px;color:var(--tx3)}
+.photo-btn .pt{font-size:13px;color:var(--t2);font-weight:500}
+.photo-btn .ph{font-size:11px;color:var(--t3)}
 #photo-preview{display:none;width:100%;border-radius:9px;max-height:180px;object-fit:cover}
-.photo-change{text-align:center;padding:6px 0 10px;font-size:12px;color:var(--green);cursor:pointer;font-weight:500}
+.photo-change{text-align:center;padding:6px 0 10px;font-size:12px;color:var(--g);cursor:pointer;font-weight:500}
 
-/* ── Searchable dropdown ── */
+/* Searchable DD */
 .dd-wrap{padding:8px 12px 12px;position:relative}
 .dd-row{position:relative}
 .dd-in{width:100%;padding:11px 38px 11px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);font-size:15px;color:var(--tx);background:#fafafa;outline:none;font-family:inherit;-webkit-appearance:none}
-.dd-in:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(0,185,0,0.1)}
-.dd-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--tx3);pointer-events:none}
+.dd-in:focus{border-color:var(--g);background:#fff;box-shadow:0 0 0 3px rgba(0,185,0,0.1)}
+.dd-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--t3);pointer-events:none}
 .dd-list{display:none;position:absolute;left:0;right:0;top:calc(100% + 3px);background:#fff;border:0.5px solid var(--bd2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.13);z-index:999;max-height:210px;overflow-y:auto}
 .dd-list.open{display:block}
 .dd-item{padding:12px 14px;font-size:14px;color:var(--tx);cursor:pointer;border-bottom:0.5px solid var(--bd)}
 .dd-item:last-child{border-bottom:none}
-.dd-item:active,.dd-item:hover{background:var(--green-lt)}
+.dd-item:active,.dd-item:hover{background:var(--gl)}
 .dd-item mark{background:#b8f0b8;color:#005500;border-radius:3px;font-style:normal}
-.dd-item.sel{background:var(--green-lt);color:#006600;font-weight:600}
-.dd-empty{padding:14px;text-align:center;font-size:13px;color:var(--tx3)}
-.dd-tag{display:none;margin-top:6px;padding:7px 10px;background:var(--green-lt);border:0.5px solid var(--green-bd);border-radius:8px;font-size:13px;color:#006600;align-items:center;gap:6px}
+.dd-item.sel{background:var(--gl);color:#006600;font-weight:600}
+.dd-empty{padding:14px;text-align:center;font-size:13px;color:var(--t3)}
+.dd-tag{display:none;margin-top:6px;padding:7px 10px;background:var(--gl);border:0.5px solid var(--gb);border-radius:8px;font-size:13px;color:#006600;align-items:center;gap:6px}
 .dd-tag.show{display:flex}
 .dd-tag-x{margin-left:auto;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;border-radius:50%;background:rgba(0,0,0,0.06)}
 
-/* ── Native select dropdown ── */
+/* Select */
 .sel-wrap{padding:8px 12px 12px}
 .sel-row{position:relative}
 .sel-in{width:100%;padding:11px 38px 11px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);font-size:15px;color:var(--tx);background:#fafafa;outline:none;font-family:inherit;-webkit-appearance:none;appearance:none;cursor:pointer}
-.sel-in:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(0,185,0,0.1)}
-.sel-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--tx3);pointer-events:none}
+.sel-in:focus{border-color:var(--g);background:#fff;box-shadow:0 0 0 3px rgba(0,185,0,0.1)}
+.sel-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--t3);pointer-events:none}
 
-/* อื่นๆ sub-options */
-.sub-panel{display:none;background:#f5fdf5;border-top:0.5px solid var(--green-bd);padding:10px 12px 12px}
+/* Sub panel */
+.sub-panel{display:none;background:#f5fdf5;border-top:0.5px solid var(--gb);padding:10px 12px 12px}
 .sub-panel.show{display:block}
 .sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
 .sub-chip{padding:10px 8px;border-radius:10px;font-size:13px;color:var(--tx);border:0.5px solid var(--bd2);background:#fff;cursor:pointer;text-align:center;line-height:1.4;font-family:inherit;transition:all .15s;-webkit-appearance:none}
-.sub-chip:active,.sub-chip.active{background:var(--green-lt);border-color:var(--green);color:#006600;font-weight:600}
+.sub-chip:active,.sub-chip.active{background:var(--gl);border-color:var(--g);color:#006600;font-weight:600}
 .sub-full{grid-column:1/-1}
 .sub-free{margin-top:8px;display:none}
 .sub-free-in{width:100%;padding:10px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);font-size:14px;color:var(--tx);background:#fff;outline:none;font-family:inherit}
-.sub-free-in:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,185,0,0.1)}
+.sub-free-in:focus{border-color:var(--g)}
 
-/* ── Sector pills (ภาค) ── */
-.pills{padding:8px 12px 12px;display:flex;flex-wrap:wrap;gap:7px}
-.pill{padding:8px 14px;border-radius:20px;font-size:13px;border:0.5px solid var(--bd2);color:var(--tx2);cursor:pointer;background:#fafafa;font-family:inherit;-webkit-appearance:none;transition:all .15s}
-.pill:active,.pill.active{background:var(--green-lt);border-color:var(--green);color:#006600;font-weight:600}
 
-/* ── Error ── */
+
+/* Autofill read-only field */
+.af-field{padding:11px 12px;border:0.5px solid var(--bd);border-radius:var(--ri);font-size:15px;color:var(--t3);background:#f5f5f5}
+.af-field.filled{background:var(--gl);border-color:var(--gb);color:#006600;font-weight:500}
+
+/* Error */
 .err{font-size:11px;color:var(--red);padding:0 12px 8px;display:none}
 .err.show{display:block}
 
-/* ── Submit ── */
+/* Submit */
 .submit-wrap{position:fixed;bottom:0;left:0;right:0;padding:10px 12px env(safe-area-inset-bottom,10px);background:rgba(240,242,240,0.95);backdrop-filter:blur(8px);border-top:0.5px solid var(--bd)}
-#submit-btn{width:100%;padding:15px;background:var(--green);color:#fff;border:none;border-radius:var(--ri);font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
-#submit-btn:active{background:var(--green-dk)}
+#submit-btn{width:100%;padding:15px;background:var(--g);color:#fff;border:none;border-radius:var(--ri);font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+#submit-btn:active{background:var(--gd)}
 #submit-btn:disabled{background:#b0b0b0;cursor:not-allowed}
 
-/* ── Overlay ── */
+/* Overlay */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:800;align-items:center;justify-content:center;flex-direction:column;gap:14px}
 .overlay.show{display:flex}
 .spin{width:46px;height:46px;border:4px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .ov-tx{color:#fff;font-size:14px}
 
-/* ── Toast ── */
+/* Toast */
 .toast{display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 22px;border-radius:10px;font-size:14px;color:#fff;z-index:900;white-space:nowrap;font-weight:500}
 .toast.show{display:block}
 .toast.ok{background:#00a000}
@@ -117,7 +101,6 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
 </head>
 <body>
 
-<!-- Header -->
 <div class="hdr">
   <div class="hdr-inner">
     <div class="hdr-logo">✅</div>
@@ -135,11 +118,7 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
   <div class="sec">
     <div class="sec-hd">📷 รูปภาพ<span class="req">*</span></div>
     <div class="photo-btn" id="photo-btn" onclick="document.getElementById('photo-input').click()">
-      <div id="photo-ph">
-        <div class="pi">📷</div>
-        <div class="pt">ถ่ายรูป / อัปโหลด</div>
-        <div class="ph">JPG, PNG ไม่เกิน 5MB</div>
-      </div>
+      <div id="photo-ph"><div class="pi">📷</div><div class="pt">ถ่ายรูป / อัปโหลด</div><div class="ph">JPG, PNG ไม่เกิน 5MB</div></div>
       <img id="photo-preview" alt="preview"/>
     </div>
     <div class="photo-change" id="photo-change" style="display:none" onclick="document.getElementById('photo-input').click()">🔄 เปลี่ยนรูป</div>
@@ -157,49 +136,38 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
         <span class="dd-ic">🔍</span>
       </div>
       <div class="dd-list" id="bay-list"></div>
-      <div class="dd-tag" id="bay-tag">✅ <span id="bay-tag-tx"></span><span class="dd-tag-x" onclick="clearDD('bay')">✕</span></div>
+      <div class="dd-tag" id="bay-tag">✅ <span id="bay-tag-tx"></span>
+        <span class="dd-tag-x" onclick="clearBAY()">✕</span>
+      </div>
     </div>
     <div class="err" id="err-bay">กรุณาเลือกสาขา BAY</div>
   </div>
 
-  <!-- 3. สาขาเงินติดล้อ -->
+  <!-- 3. สาขาเงินติดล้อ (autofill) -->
   <div class="sec">
-    <div class="sec-hd">🏪 สาขาเงินติดล้อ<span class="req">*</span></div>
-    <div class="dd-wrap" id="ngn-wrap">
-      <div class="dd-row">
-        <input class="dd-in" id="ngn-in" type="text" placeholder="ค้นหาสาขาเงินติดล้อ..." autocomplete="off"
-          oninput="filterDD('ngn')" onfocus="openDD('ngn')"/>
-        <span class="dd-ic">🔍</span>
-      </div>
-      <div class="dd-list" id="ngn-list"></div>
-      <div class="dd-tag" id="ngn-tag">✅ <span id="ngn-tag-tx"></span><span class="dd-tag-x" onclick="clearDD('ngn')">✕</span></div>
+    <div class="sec-hd">🏪 สาขาเงินติดล้อ</div>
+    <div style="padding:8px 12px 12px">
+      <div class="af-field" id="af-ngn">— เลือกสาขา BAY ก่อน —</div>
     </div>
-    <div class="err" id="err-ngn">กรุณาเลือกสาขาเงินติดล้อ</div>
   </div>
 
-  <!-- 4. พื้นที่ -->
+  <!-- 4. พื้นที่ (autofill) -->
   <div class="sec">
-    <div class="sec-hd">📍 พื้นที่<span class="req">*</span></div>
-    <div class="dd-wrap" id="area-wrap">
-      <div class="dd-row">
-        <input class="dd-in" id="area-in" type="text" placeholder="ค้นหาพื้นที่..." autocomplete="off"
-          oninput="filterDD('area')" onfocus="openDD('area')"/>
-        <span class="dd-ic">🔍</span>
-      </div>
-      <div class="dd-list" id="area-list"></div>
-      <div class="dd-tag" id="area-tag">✅ <span id="area-tag-tx"></span><span class="dd-tag-x" onclick="clearDD('area')">✕</span></div>
+    <div class="sec-hd">📍 พื้นที่</div>
+    <div style="padding:8px 12px 12px">
+      <div class="af-field" id="af-area">— เลือกสาขา BAY ก่อน —</div>
     </div>
-    <div class="err" id="err-area">กรุณาเลือกพื้นที่</div>
   </div>
 
-  <!-- 5. ภาค -->
+  <!-- 5. ภาค (autofill) -->
   <div class="sec">
-    <div class="sec-hd">🗺️ ภาค<span class="req">*</span></div>
-    <div class="pills" id="sector-pills"></div>
-    <div class="err" id="err-sector">กรุณาเลือกภาค</div>
+    <div class="sec-hd">🗺️ ภาค</div>
+    <div style="padding:8px 12px 12px">
+      <div class="af-field" id="af-sector">— เลือกสาขา BAY ก่อน —</div>
+    </div>
   </div>
 
-  <!-- 6. ประเภทกิจกรรม (dropdown) -->
+  <!-- 4. ประเภทกิจกรรม -->
   <div class="sec">
     <div class="sec-hd">🎯 ประเภทกิจกรรม<span class="req">*</span></div>
     <div class="sel-wrap">
@@ -214,9 +182,8 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
         <span class="sel-ic">▼</span>
       </div>
     </div>
-    <!-- Sub-panel สำหรับ อื่นๆ -->
     <div class="sub-panel" id="sub-panel">
-      <div class="sec-hd" style="padding:0 0 6px;font-size:11px">เลือกประเภทย่อย<span class="req">*</span></div>
+      <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:5px">เลือกประเภทย่อย<span class="req">*</span></div>
       <div class="sub-grid">
         <button type="button" class="sub-chip" onclick="pickSub(this,'Call Lead')">📞 Call Lead</button>
         <button type="button" class="sub-chip" onclick="pickSub(this,'ออกบูธ')">🏪 ออกบูธ</button>
@@ -230,12 +197,12 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
     <div class="err" id="err-activity">กรุณาเลือกประเภทกิจกรรม</div>
   </div>
 
-  <!-- 7. เข้าพร้อม (dropdown) -->
+  <!-- 5. เข้าพร้อม -->
   <div class="sec">
     <div class="sec-hd">👥 เข้าพร้อม<span class="req">*</span></div>
     <div class="sel-wrap">
       <div class="sel-row">
-        <select class="sel-in" id="accompany-sel" onchange="onAccompanyChange(this)">
+        <select class="sel-in" id="accompany-sel" onchange="chosen.accompany=this.value||null;hideErr('accompany')">
           <option value="">— เลือกผู้ร่วมเข้า —</option>
           <option value="เข้าคนเดียว">เข้าคนเดียว</option>
           <option value="GRM">GRM</option>
@@ -248,41 +215,31 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
     <div class="err" id="err-accompany">กรุณาเลือกผู้ร่วมเข้า</div>
   </div>
 
-</div><!-- /form -->
+</div>
 
-<!-- Submit bar -->
 <div class="submit-wrap">
   <button id="submit-btn" onclick="submitForm()">✅ ยืนยัน Check-in</button>
 </div>
 
-<!-- Overlay loading -->
 <div class="overlay" id="loading">
   <div class="spin"></div>
   <div class="ov-tx">กำลังบันทึกข้อมูล...</div>
 </div>
 
-<!-- Toasts -->
 <div class="toast ok" id="t-ok">✅ Check-in สำเร็จ!</div>
 <div class="toast ng" id="t-ng">❌ เกิดข้อผิดพลาด ลองใหม่อีกครั้ง</div>
 
 <script>
-// ═══════════════════════════════════════
-//  CONFIG — แก้ไขตรงนี้
-// ═══════════════════════════════════════
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxigZ_NzQ4WzXRnHbY7fnxKkTfTYXUhs4_ZuBlDGF_zr2_74oA8YtVb2WW4nnxVCPvHng/exec';
 const LIFF_ID = '2011871894-qTJSFRVJ';
 
-// ═══════════════════════════════════════
-//  State
-// ═══════════════════════════════════════
-const masters = { bay:[], ngn:[], area:[], sectors:[] };
+const masters = { bay:[] };
+const mapping = {}; // bayName → { ngn, area, sector }
 const chosen  = { bay:null, ngn:null, area:null, sector:null, activity:null, subActivity:null, accompany:null };
 let photoBase64 = null;
 let lineProfile = { userId:'', displayName:'' };
 
-// ═══════════════════════════════════════
-//  Init
-// ═══════════════════════════════════════
+// ── Init ──
 window.addEventListener('load', async () => {
   tick(); setInterval(tick, 30000);
   try {
@@ -297,41 +254,27 @@ window.addEventListener('load', async () => {
 
 function tick() {
   const now = new Date();
-  const opts = { weekday:'short', year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Bangkok' };
-  document.getElementById('live-date').textContent = now.toLocaleDateString('th-TH', opts);
+  document.getElementById('live-date').textContent = now.toLocaleDateString('th-TH',
+    { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Bangkok' });
 }
 
-// ═══════════════════════════════════════
-//  Masters
-// ═══════════════════════════════════════
+// ── Masters ──
 async function loadMasters() {
   try {
     const r = await fetch(`${GAS_URL}?action=getMasters`);
     const d = await r.json();
     if (d.status === 'ok') {
-      masters.bay    = d.bay.map(x=>x.name);
-      masters.ngn    = d.ngn.map(x=>x.name);
-      masters.area   = d.area.map(x=>x.name);
-      const rgns     = [...new Set(d.ngn.map(x=>x.region).filter(Boolean))];
-      masters.sectors = rgns.length ? rgns : ['BE','BS','BN','ES','EN','CN','CE','NO','SO'];
+      masters.bay = d.bay.map(x => x.name);
+      // สร้าง mapping: bay name → ngn/area/sector
+      d.bay.forEach(b => {
+        const n = d.ngn.find(x => x.code === b.code);
+        if (n) mapping[b.name] = { ngn: n.name, area: n.area, sector: n.region };
+      });
     }
-  } catch(_) {
-    masters.bay     = ['BAY สยามพารากอน','BAY เซ็นทรัลเวิลด์','BAY ลาดพร้าว','BAY บางนา','BAY รัชดา','BAY พระราม 9'];
-    masters.ngn     = ['เงินติดล้อ พระราม 4','เงินติดล้อ รังสิต','เงินติดล้อ เชียงใหม่','เงินติดล้อ ขอนแก่น'];
-    masters.area    = ['กรุงเทพและปริมณฑล','ภาคเหนือตอนบน','ภาคอีสาน','ภาคใต้'];
-    masters.sectors = ['ภาคเหนือ','ภาคใต้','ภาคตะวันออก','ภาคตะวันตก','ภาคกลาง','ภาคอีสาน'];
-  }
-  renderPills();
+  } catch(_) { masters.bay = []; }
 }
 
-function renderPills() {
-  document.getElementById('sector-pills').innerHTML =
-    masters.sectors.map(s=>`<button type="button" class="pill" onclick="pickPill(this,'${s}')">${s}</button>`).join('');
-}
-
-// ═══════════════════════════════════════
-//  Photo
-// ═══════════════════════════════════════
+// ── Photo ──
 function handlePhoto(input) {
   const f = input.files[0]; if (!f) return;
   if (f.size > 5*1024*1024) { alert('ไฟล์ใหญ่เกิน 5MB'); return; }
@@ -347,71 +290,82 @@ function handlePhoto(input) {
   r.readAsDataURL(f);
 }
 
-// ═══════════════════════════════════════
-//  Searchable Dropdown
-// ═══════════════════════════════════════
+// ── BAY Dropdown ──
 document.addEventListener('click', e => {
-  ['bay','ngn','area'].forEach(k => {
-    const w = document.getElementById(k+'-wrap');
-    if (w && !w.contains(e.target)) document.getElementById(k+'-list').classList.remove('open');
-  });
+  const w = document.getElementById('bay-wrap');
+  if (w && !w.contains(e.target)) document.getElementById('bay-list').classList.remove('open');
 });
 
 function openDD(k) { filterDD(k); document.getElementById(k+'-list').classList.add('open'); }
 
 function filterDD(k) {
-  const q = document.getElementById(k+'-in').value.toLowerCase().trim();
+  const q    = document.getElementById(k+'-in').value.toLowerCase().trim();
   const list = document.getElementById(k+'-list');
-  const hits = q ? masters[k].filter(x=>x.toLowerCase().includes(q)) : masters[k];
+  const hits = q ? masters[k].filter(x => x.toLowerCase().includes(q)) : masters[k];
   if (!hits.length) {
     list.innerHTML = '<div class="dd-empty">ไม่พบข้อมูล</div>';
   } else {
     const esc = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    list.innerHTML = hits.map(x=>{
+    list.innerHTML = hits.map(x => {
       const hl = q ? x.replace(new RegExp(`(${esc})`,'gi'),'<mark>$1</mark>') : x;
-      return `<div class="dd-item${chosen[k]===x?' sel':''}" onclick="pickDD('${k}','${x.replace(/'/g,"\\'")}')"> ${hl}</div>`;
+      return `<div class="dd-item${chosen[k]===x?' sel':''}" onclick="pickBAY('${x.replace(/'/g,"\\'")}')"> ${hl}</div>`;
     }).join('');
   }
   list.classList.add('open');
 }
 
-function pickDD(k, val) {
-  chosen[k] = val;
-  document.getElementById(k+'-in').value = val;
-  document.getElementById(k+'-list').classList.remove('open');
-  document.getElementById(k+'-tag-tx').textContent = val;
-  document.getElementById(k+'-tag').classList.add('show');
-  hideErr(k);
+function pickBAY(val) {
+  chosen.bay = val;
+  document.getElementById('bay-in').value = val;
+  document.getElementById('bay-list').classList.remove('open');
+  document.getElementById('bay-tag-tx').textContent = val;
+  document.getElementById('bay-tag').classList.add('show');
+  hideErr('bay');
+
+  // Auto-fill
+  const m = mapping[val];
+  if (m) {
+    chosen.ngn    = m.ngn    || null;
+    chosen.area   = m.area   || null;
+    chosen.sector = m.sector || null;
+    setAF('af-ngn',    m.ngn);
+    setAF('af-area',   m.area);
+    setAF('af-sector', m.sector);
+  } else {
+    chosen.ngn = chosen.area = chosen.sector = null;
+    clearAF('af-ngn'); clearAF('af-area'); clearAF('af-sector');
+  }
 }
 
-function clearDD(k) {
-  chosen[k] = null;
-  document.getElementById(k+'-in').value = '';
-  document.getElementById(k+'-tag').classList.remove('show');
+function setAF(id, val) {
+  const el = document.getElementById(id);
+  el.textContent = val || '—';
+  if (val) el.classList.add('filled'); else el.classList.remove('filled');
 }
 
-// ═══════════════════════════════════════
-//  Sector pills
-// ═══════════════════════════════════════
-function pickPill(el, val) {
-  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  chosen.sector = val; hideErr('sector');
+function clearAF(id) {
+  const el = document.getElementById(id);
+  el.textContent = '— เลือกสาขา BAY ก่อน —';
+  el.classList.remove('filled');
 }
 
-// ═══════════════════════════════════════
-//  Activity dropdown + sub-options
-// ═══════════════════════════════════════
+function clearBAY() {
+  chosen.bay = chosen.ngn = chosen.area = chosen.sector = null;
+  document.getElementById('bay-in').value = '';
+  document.getElementById('bay-tag').classList.remove('show');
+  clearAF('af-ngn'); clearAF('af-area'); clearAF('af-sector');
+}
+
+// ── Activity ──
 function onActivityChange(sel) {
-  const val = sel.value;
-  chosen.activity = val || null;
+  chosen.activity    = sel.value || null;
   chosen.subActivity = null;
   hideErr('activity');
   const panel = document.getElementById('sub-panel');
   const free  = document.getElementById('sub-free');
-  if (val === 'อื่นๆ') {
+  if (sel.value === 'อื่นๆ') {
     panel.classList.add('show');
-    document.querySelectorAll('.sub-chip').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.sub-chip').forEach(c => c.classList.remove('active'));
     free.style.display = 'none';
     document.getElementById('sub-free-in').value = '';
   } else {
@@ -421,7 +375,7 @@ function onActivityChange(sel) {
 }
 
 function pickSub(el, val) {
-  document.querySelectorAll('.sub-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.sub-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   chosen.subActivity = val; hideErr('activity');
   const free = document.getElementById('sub-free');
@@ -439,30 +393,17 @@ function getActivity() {
   return chosen.subActivity;
 }
 
-// ═══════════════════════════════════════
-//  Accompany dropdown
-// ═══════════════════════════════════════
-function onAccompanyChange(sel) {
-  chosen.accompany = sel.value || null;
-  hideErr('accompany');
-}
-
-// ═══════════════════════════════════════
-//  Validation
-// ═══════════════════════════════════════
+// ── Validate ──
 function showErr(k){ document.getElementById('err-'+k).classList.add('show'); }
 function hideErr(k){ document.getElementById('err-'+k).classList.remove('show'); }
 
 function validate() {
   let ok = true;
   const checks = [
-    //[!photoBase64,       'photo'],
-    [!chosen.bay,        'bay'],
-    [!chosen.ngn,        'ngn'],
-    [!chosen.area,       'area'],
-    [!chosen.sector,     'sector'],
-    [!getActivity(),     'activity'],
-    [!chosen.accompany,  'accompany'],
+    [!photoBase64,      'photo'],
+    [!chosen.bay,       'bay'],
+    [!getActivity(),    'activity'],
+    [!chosen.accompany, 'accompany'],
   ];
   checks.forEach(([fail, key]) => { if (fail) { showErr(key); ok = false; } });
   if (!ok) {
@@ -472,9 +413,7 @@ function validate() {
   return ok;
 }
 
-// ═══════════════════════════════════════
-//  Submit
-// ═══════════════════════════════════════
+// ── Submit ──
 async function submitForm() {
   if (!validate()) return;
   document.getElementById('loading').classList.add('show');
@@ -482,7 +421,7 @@ async function submitForm() {
 
   const actVal = getActivity();
   const payload = {
-    action: 'checkIn',
+    action:       'checkIn',
     lineUserId:   lineProfile.userId,
     lineUserName: lineProfile.displayName,
     bay:          chosen.bay,
@@ -510,14 +449,14 @@ async function submitForm() {
               { type:'text', text:`${data.date}  ${data.time}`, size:'sm', color:'#888' },
               { type:'separator' },
               { type:'text', text:`สาขา BAY: ${chosen.bay}`, size:'sm' },
-              { type:'text', text:`สาขาเงินติดล้อ: ${chosen.ngn}`, size:'sm' },
-              { type:'text', text:`พื้นที่: ${chosen.area} | ภาค: ${chosen.sector}`, size:'sm' },
+              { type:'text', text:`สาขาเงินติดล้อ: ${chosen.ngn||'-'}`, size:'sm' },
+              { type:'text', text:`พื้นที่: ${chosen.area||'-'} | ภาค: ${chosen.sector||'-'}`, size:'sm' },
               { type:'text', text:`กิจกรรม: ${actVal}`, size:'sm', color:'#00B900', weight:'bold' },
               { type:'text', text:`เข้าพร้อม: ${chosen.accompany}`, size:'sm' }
             ]}}
           }]);
         } catch(_) {}
-        setTimeout(()=>liff.closeWindow(), 1500);
+        setTimeout(() => liff.closeWindow(), 1500);
       }
       resetForm();
     } else { throw new Error(data.message); }
@@ -529,30 +468,27 @@ async function submitForm() {
   document.getElementById('submit-btn').disabled = false;
 }
 
-// ═══════════════════════════════════════
-//  Reset
-// ═══════════════════════════════════════
+// ── Reset ──
 function resetForm() {
   photoBase64 = null;
   document.getElementById('photo-preview').style.display = 'none';
   document.getElementById('photo-ph').style.display = 'block';
   document.getElementById('photo-change').style.display = 'none';
   document.getElementById('photo-input').value = '';
-  ['bay','ngn','area'].forEach(k=>clearDD(k));
-  chosen.sector = null; chosen.activity = null; chosen.subActivity = null; chosen.accompany = null;
-  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  clearBAY();
+  chosen.activity = chosen.subActivity = chosen.accompany = null;
   document.getElementById('activity-sel').value = '';
   document.getElementById('accompany-sel').value = '';
   document.getElementById('sub-panel').classList.remove('show');
   document.getElementById('sub-free').style.display = 'none';
   document.getElementById('sub-free-in').value = '';
-  document.querySelectorAll('.sub-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.sub-chip').forEach(c => c.classList.remove('active'));
 }
 
 function showToast(t) {
   const el = document.getElementById('t-'+t);
   el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), 3000);
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
 </script>
 </body>

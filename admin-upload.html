@@ -6,126 +6,110 @@
 <title>Admin — จัดการข้อมูล Master</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  :root { --green: #00B900; --green-light: #e8fae8; --green-border: #a3d9a3; }
-  * { box-sizing: border-box; }
-  body { font-family: 'Noto Sans Thai', sans-serif; background: #f0f2f5; margin: 0; min-height: 100vh; }
-  .top-bar { background: #1565c0; color: white; padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
-  .top-bar h1 { font-size: 18px; font-weight: 600; }
-  .container { max-width: 960px; margin: 24px auto; padding: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 600px) { .container { grid-template-columns: 1fr; } }
-  .card { background: white; border-radius: 12px; border: 0.5px solid #ddd; padding: 20px; }
-  .card h2 { font-size: 15px; font-weight: 600; color: #222; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-  .card .desc { font-size: 12px; color: #777; margin-bottom: 14px; line-height: 1.6; }
-  .upload-zone { border: 2px dashed #ccc; border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; background: #fafafa; transition: border-color 0.2s; }
-  .upload-zone:hover { border-color: var(--green); }
-  .upload-zone input[type=file] { display: none; }
-  .upload-zone .uz-icon { font-size: 32px; margin-bottom: 8px; }
-  .upload-zone .uz-text { font-size: 13px; color: #555; }
-  .upload-zone .uz-hint { font-size: 11px; color: #aaa; margin-top: 4px; }
-  .status { margin-top: 10px; font-size: 13px; min-height: 20px; }
-  .status.ok { color: var(--green); }
-  .status.err { color: #e24b4a; }
-  .preview-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
-  .preview-table th { background: #1565c0; color: white; padding: 6px 10px; text-align: left; }
-  .preview-table td { padding: 5px 10px; border-bottom: 0.5px solid #eee; }
-  .preview-table tr:nth-child(even) td { background: #f5f8ff; }
-  .row-count { font-size: 12px; color: #555; margin-top: 6px; }
-  .upload-btn { margin-top: 12px; width: 100%; padding: 11px; background: var(--green); color: white; border: none; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; display: none; }
-  .upload-btn:disabled { background: #aaa; }
-  .template-link { margin-top: 8px; font-size: 12px; color: #1565c0; cursor: pointer; text-decoration: underline; }
-  .full-card { grid-column: 1 / -1; }
-  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 0; }
-  .stat-box { background: var(--green-light); border: 0.5px solid var(--green-border); border-radius: 10px; padding: 16px; text-align: center; }
-  .stat-box .num { font-size: 28px; font-weight: 700; color: #007a00; }
-  .stat-box .lbl { font-size: 12px; color: #555; margin-top: 4px; }
-  .info-box { background: #e3f2fd; border: 0.5px solid #90caf9; border-radius: 10px; padding: 14px; font-size: 13px; color: #1565c0; line-height: 1.8; }
+:root{--green:#00B900;--gl:#e6f9e6;--gb:#99d499;--blue:#1565c0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai',system-ui,sans-serif;background:#f0f2f5;min-height:100vh}
+.top{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px}
+.top h1{font-size:17px;font-weight:600}
+.top p{font-size:11px;opacity:.8;margin-top:2px}
+.wrap{max-width:720px;margin:20px auto;padding:0 16px 40px}
+
+/* stat */
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.stat{background:#fff;border-radius:12px;border:0.5px solid #ddd;padding:14px;text-align:center}
+.stat .n{font-size:28px;font-weight:700;color:var(--green)}
+.stat .l{font-size:12px;color:#666;margin-top:2px}
+
+/* card */
+.card{background:#fff;border-radius:12px;border:0.5px solid #ddd;padding:20px;margin-bottom:14px}
+.card h2{font-size:15px;font-weight:600;color:#222;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.desc{font-size:12px;color:#777;margin-bottom:14px;line-height:1.8;background:#f8f8f8;border-radius:8px;padding:10px 12px;border:0.5px solid #e5e5e5}
+.desc b{color:#333}
+.col-tag{display:inline-block;background:var(--blue);color:#fff;border-radius:4px;padding:1px 8px;font-size:11px;font-family:monospace;margin:1px}
+
+/* upload zone */
+.zone{border:2px dashed #ccc;border-radius:10px;padding:22px;text-align:center;cursor:pointer;background:#fafafa;transition:border-color .2s;margin-bottom:10px}
+.zone:hover{border-color:var(--green)}
+.zone input{display:none}
+.zone .zi{font-size:30px;margin-bottom:6px}
+.zone .zt{font-size:13px;color:#555}
+.zone .zh{font-size:11px;color:#aaa;margin-top:3px}
+
+/* status */
+.status{font-size:13px;min-height:18px;margin-bottom:6px}
+.status.ok{color:var(--green)}
+.status.err{color:#e53935}
+
+/* preview */
+.preview-wrap{overflow-x:auto;margin:8px 0}
+table.prev{width:100%;border-collapse:collapse;font-size:12px}
+table.prev th{background:var(--blue);color:#fff;padding:6px 10px;text-align:left}
+table.prev td{padding:5px 10px;border-bottom:0.5px solid #eee}
+table.prev tr:nth-child(even) td{background:#f5f8ff}
+.row-count{font-size:11px;color:#888;margin-top:4px}
+
+/* buttons */
+.btn-upload{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;display:none;margin-top:6px}
+.btn-upload:disabled{background:#aaa}
+.btn-tpl{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;color:var(--blue);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit;padding:0}
+
+/* info */
+.info{background:#e3f2fd;border:0.5px solid #90caf9;border-radius:10px;padding:14px;font-size:13px;color:var(--blue);line-height:1.8}
 </style>
 </head>
 <body>
 
-<div class="top-bar">
+<div class="top">
   <span style="font-size:22px">⚙️</span>
   <div>
     <h1>Admin — จัดการข้อมูล Master</h1>
-    <div style="font-size:12px; opacity:0.8">อัปโหลดข้อมูลสาขาและพื้นที่ผ่านไฟล์ Excel</div>
+    <p>อัปโหลดข้อมูล Mapping สาขาผ่านไฟล์ Excel</p>
   </div>
 </div>
 
-<div class="container">
+<div class="wrap">
 
-  <div class="card full-card">
-    <div class="summary-grid">
-      <div class="stat-box"><div class="num" id="cnt-bay">—</div><div class="lbl">สาขา BAY</div></div>
-      <div class="stat-box"><div class="num" id="cnt-ngn">—</div><div class="lbl">สาขาเงินติดล้อ</div></div>
-      <div class="stat-box"><div class="num" id="cnt-area">—</div><div class="lbl">พื้นที่</div></div>
-    </div>
+  <!-- Stat -->
+  <div class="stat-row">
+    <div class="stat"><div class="n" id="cnt-bay">—</div><div class="l">สาขา BAY</div></div>
+    <div class="stat"><div class="n" id="cnt-ngn">—</div><div class="l">สาขาเงินติดล้อ</div></div>
   </div>
 
-  <!-- BAY -->
+  <!-- Upload Mapping -->
   <div class="card">
-    <h2>🏦 สาขา BAY</h2>
+    <h2>📊 อัปโหลดข้อมูล Mapping สาขา</h2>
     <div class="desc">
-      คอลัมน์ที่ต้องมีในไฟล์ Excel:<br>
-      <b>A: รหัสสาขา</b> | <b>B: ชื่อสาขา BAY</b>
+      ไฟล์ Excel ต้องมีคอลัมน์ดังนี้ (ตามลำดับ):<br>
+      <span class="col-tag">A: รหัสสาขา BAY</span>
+      <span class="col-tag">B: ชื่อสาขา BAY</span>
+      <span class="col-tag">C: ชื่อสาขาเงินติดล้อ</span>
+      <span class="col-tag">D: พื้นที่</span>
+      <span class="col-tag">E: ภาค</span><br><br>
+      เมื่อพนักงานเลือก <b>สาขา BAY</b> ระบบจะ Auto-fill <b>สาขาเงินติดล้อ / พื้นที่ / ภาค</b> ให้อัตโนมัติ
     </div>
-    <label class="upload-zone" id="zone-bay">
-      <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFile(this,'bay')" />
-      <div class="uz-icon">📊</div>
-      <div class="uz-text">คลิกหรือลากไฟล์มาวางที่นี่</div>
-      <div class="uz-hint">รองรับ .xlsx .xls .csv</div>
+
+    <label class="zone">
+      <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFile(this)"/>
+      <div class="zi">📂</div>
+      <div class="zt">คลิกหรือลากไฟล์มาวางที่นี่</div>
+      <div class="zh">รองรับ .xlsx .xls .csv</div>
     </label>
-    <div class="status" id="status-bay"></div>
-    <div id="preview-bay"></div>
-    <button class="upload-btn" id="btn-bay" onclick="uploadToGAS('bay')">⬆️ อัปโหลดไปยัง Google Sheet</button>
-    <div class="template-link" onclick="downloadTemplate('bay')">⬇️ ดาวน์โหลด Template</div>
+
+    <div class="status" id="status-main"></div>
+    <div id="preview-main"></div>
+    <button class="btn-upload" id="btn-main" onclick="uploadToSheet()">⬆️ อัปโหลดไปยัง Google Sheet</button>
+    <button class="btn-tpl" onclick="downloadTemplate()">⬇️ ดาวน์โหลด Template ตัวอย่าง</button>
   </div>
 
-  <!-- NGN -->
+  <!-- Info -->
   <div class="card">
-    <h2>🏪 สาขาเงินติดล้อ</h2>
-    <div class="desc">
-      คอลัมน์ที่ต้องมีในไฟล์ Excel:<br>
-      <b>A: รหัสสาขา</b> | <b>B: ชื่อสาขา</b> | <b>C: พื้นที่</b> | <b>D: ภาค</b>
-    </div>
-    <label class="upload-zone" id="zone-ngn">
-      <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFile(this,'ngn')" />
-      <div class="uz-icon">📊</div>
-      <div class="uz-text">คลิกหรือลากไฟล์มาวางที่นี่</div>
-      <div class="uz-hint">รองรับ .xlsx .xls .csv</div>
-    </label>
-    <div class="status" id="status-ngn"></div>
-    <div id="preview-ngn"></div>
-    <button class="upload-btn" id="btn-ngn" onclick="uploadToGAS('ngn')">⬆️ อัปโหลดไปยัง Google Sheet</button>
-    <div class="template-link" onclick="downloadTemplate('ngn')">⬇️ ดาวน์โหลด Template</div>
-  </div>
-
-  <!-- Area -->
-  <div class="card">
-    <h2>📍 พื้นที่ / ภาค</h2>
-    <div class="desc">
-      คอลัมน์ที่ต้องมีในไฟล์ Excel:<br>
-      <b>A: ชื่อพื้นที่</b> | <b>B: ภาค</b>
-    </div>
-    <label class="upload-zone" id="zone-area">
-      <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFile(this,'area')" />
-      <div class="uz-icon">📊</div>
-      <div class="uz-text">คลิกหรือลากไฟล์มาวางที่นี่</div>
-      <div class="uz-hint">รองรับ .xlsx .xls .csv</div>
-    </label>
-    <div class="status" id="status-area"></div>
-    <div id="preview-area"></div>
-    <button class="upload-btn" id="btn-area" onclick="uploadToGAS('area')">⬆️ อัปโหลดไปยัง Google Sheet</button>
-    <div class="template-link" onclick="downloadTemplate('area')">⬇️ ดาวน์โหลด Template</div>
-  </div>
-
-  <div class="card">
-    <div class="info-box">
+    <div class="info">
       <b>📌 ขั้นตอนการอัปโหลด</b><br>
-      1. เตรียมไฟล์ Excel ตามรูปแบบที่กำหนด<br>
-      2. คลิกหรือลากไฟล์ไปที่ช่องอัปโหลด<br>
-      3. ตรวจสอบ Preview ข้อมูลที่แสดง<br>
-      4. กดปุ่ม "อัปโหลดไปยัง Google Sheet"<br>
-      5. ข้อมูลจะอัปเดตใน Dropdown ทันที
+      1. กด <b>ดาวน์โหลด Template</b> เพื่อดูรูปแบบไฟล์<br>
+      2. กรอกข้อมูล Mapping ให้ครบทุกคอลัมน์<br>
+      3. ลากไฟล์มาวาง หรือคลิกเพื่อเลือกไฟล์<br>
+      4. ตรวจสอบ Preview แล้วกด <b>อัปโหลดไปยัง Google Sheet</b><br>
+      5. Dropdown ใน Check-in จะอัปเดตทันทีที่เปิดใหม่
     </div>
   </div>
 
@@ -134,102 +118,108 @@
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxigZ_NzQ4WzXRnHbY7fnxKkTfTYXUhs4_ZuBlDGF_zr2_74oA8YtVb2WW4nnxVCPvHng/exec';
 
-const parsedData = { bay: null, ngn: null, area: null };
-const sheetMap   = { bay: 'MasterBAY', ngn: 'MasterNGN', area: 'MasterArea' };
+let parsedRows = null;
 
-function handleFile(input, key) {
+function handleFile(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
     try {
-      const wb  = XLSX.read(e.target.result, { type: 'binary' });
-      const ws  = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      // กรองแถวว่างและ header
-      const data = rows.slice(1).filter(r => r.some(c => c !== ''));
-      parsedData[key] = data;
-      showPreview(key, rows[0], data);
-      document.getElementById('status-bay_or_key'.replace('bay_or_key', key)).textContent = '';
-      const btn = document.getElementById('btn-'+key);
-      btn.style.display = 'block';
-      document.getElementById('status-'+key).textContent = `พบข้อมูล ${data.length} แถว — กดปุ่มด้านล่างเพื่ออัปโหลด`;
-      document.getElementById('status-'+key).className = 'status ok';
-    } catch (err) {
-      document.getElementById('status-'+key).textContent = 'ไม่สามารถอ่านไฟล์ได้: ' + err.message;
-      document.getElementById('status-'+key).className = 'status err';
+      const wb   = XLSX.read(e.target.result, { type: 'binary' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const all  = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      const data = all.slice(1).filter(r => r.some(c => c !== ''));
+      parsedRows = data;
+
+      const status = document.getElementById('status-main');
+      status.textContent = `พบข้อมูล ${data.length} แถว — ตรวจสอบ Preview แล้วกดอัปโหลด`;
+      status.className = 'status ok';
+
+      // Preview
+      const headers = all[0] || ['รหัสสาขา BAY','ชื่อสาขา BAY','ชื่อสาขาเงินติดล้อ','พื้นที่','ภาค'];
+      const preview = data.slice(0, 5);
+      document.getElementById('preview-main').innerHTML = `
+        <div class="preview-wrap">
+          <table class="prev">
+            <tr>${headers.slice(0,5).map(h=>`<th>${h||'—'}</th>`).join('')}</tr>
+            ${preview.map(r=>`<tr>${r.slice(0,5).map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
+          </table>
+        </div>
+        <div class="row-count">แสดง ${preview.length} จาก ${data.length} แถว</div>`;
+
+      document.getElementById('btn-main').style.display = 'block';
+    } catch(err) {
+      document.getElementById('status-main').textContent = '❌ อ่านไฟล์ไม่ได้: ' + err.message;
+      document.getElementById('status-main').className = 'status err';
     }
   };
   reader.readAsBinaryString(file);
 }
 
-function showPreview(key, headers, data) {
-  const wrap = document.getElementById('preview-'+key);
-  const cols  = headers.length || (key === 'bay' ? 2 : key === 'ngn' ? 4 : 2);
-  const rows  = data.slice(0, 5);
-  wrap.innerHTML = `
-    <div style="overflow-x:auto; margin-top:10px;">
-      <table class="preview-table">
-        <tr>${(headers.length ? headers : Array(cols).fill('คอลัมน์')).slice(0,cols).map(h=>`<th>${h||'—'}</th>`).join('')}</tr>
-        ${rows.map(r => `<tr>${r.slice(0,cols).map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
-      </table>
-    </div>
-    <div class="row-count">แสดง ${rows.length} จาก ${data.length} แถว</div>`;
-}
-
-async function uploadToGAS(key) {
-  const btn = document.getElementById('btn-'+key);
-  if (!parsedData[key]) return;
+async function uploadToSheet() {
+  if (!parsedRows) return;
+  const btn = document.getElementById('btn-main');
   btn.disabled = true;
   btn.textContent = '⏳ กำลังอัปโหลด...';
 
-  try {
-    const payload = JSON.stringify({ action: 'uploadMaster', sheetName: sheetMap[key], rows: parsedData[key] });
-    const form = new FormData();
-    form.append('data', payload);
+  // แยก BAY และ NGN จาก Mapping
+  const bayRows  = parsedRows.map(r => [r[0], r[1]]);
+  const ngnRows  = parsedRows.map(r => [r[0], r[2], r[3], r[4]]);
+  const areaRows = [...new Map(parsedRows.map(r => [r[3], [r[3], r[4]]])).values()];
 
-    const res = await fetch(GAS_URL.replace('?',''), {
-      method: 'POST',
-      body: new URLSearchParams({ data: payload })
-    });
-    const text = await res.text();
-    const data = JSON.parse(text);
-    if (data.status === 'ok') {
-      document.getElementById('status-'+key).textContent = `✅ อัปโหลดสำเร็จ ${data.count} รายการ`;
-      document.getElementById('status-'+key).className = 'status ok';
-      if (key === 'bay')  document.getElementById('cnt-bay').textContent  = data.count;
-      if (key === 'ngn')  document.getElementById('cnt-ngn').textContent  = data.count;
-      if (key === 'area') document.getElementById('cnt-area').textContent = data.count;
-    } else throw new Error(data.message);
-  } catch (err) {
-    document.getElementById('status-'+key).textContent = '❌ อัปโหลดล้มเหลว: ' + err.message;
-    document.getElementById('status-'+key).className = 'status err';
+  try {
+    // Upload MasterBAY
+    await postToGAS({ action: 'uploadMaster', sheetName: 'MasterBAY', rows: bayRows });
+    // Upload MasterNGN
+    await postToGAS({ action: 'uploadMaster', sheetName: 'MasterNGN', rows: ngnRows });
+    // Upload MasterArea
+    await postToGAS({ action: 'uploadMaster', sheetName: 'MasterArea', rows: areaRows });
+
+    document.getElementById('status-main').textContent = `✅ อัปโหลดสำเร็จ ${parsedRows.length} สาขา`;
+    document.getElementById('status-main').className = 'status ok';
+    document.getElementById('cnt-bay').textContent = bayRows.length;
+    document.getElementById('cnt-ngn').textContent = ngnRows.length;
+  } catch(err) {
+    document.getElementById('status-main').textContent = '❌ อัปโหลดล้มเหลว: ' + err.message;
+    document.getElementById('status-main').className = 'status err';
   }
+
   btn.disabled = false;
   btn.textContent = '⬆️ อัปโหลดไปยัง Google Sheet';
 }
 
-function downloadTemplate(key) {
-  const headers = {
-    bay:  [['รหัสสาขา','ชื่อสาขา BAY'],['BAY001','BAY สยามพารากอน'],['BAY002','BAY เซ็นทรัลเวิลด์']],
-    ngn:  [['รหัสสาขา','ชื่อสาขา','พื้นที่','ภาค'],['NGN001','เงินติดล้อ พระราม 4','กรุงเทพและปริมณฑล','ภาคกลาง'],['NGN002','เงินติดล้อ เชียงใหม่','เชียงใหม่','ภาคเหนือ']],
-    area: [['พื้นที่','ภาค'],['กรุงเทพและปริมณฑล','ภาคกลาง'],['เชียงใหม่','ภาคเหนือ']]
-  };
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(headers[key]);
-  XLSX.utils.book_append_sheet(wb, ws, 'data');
-  XLSX.writeFile(wb, `template_${key}.xlsx`);
+async function postToGAS(payload) {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: new URLSearchParams({ data: JSON.stringify(payload) })
+  });
+  const text = await res.text();
+  return JSON.parse(text);
 }
 
-// Load current counts
+function downloadTemplate() {
+  const data = [
+    ['รหัสสาขา BAY','ชื่อสาขา BAY','ชื่อสาขาเงินติดล้อ','พื้นที่','ภาค'],
+    ['BAY001','BAY สยามพารากอน','เงินติดล้อ พระราม 4','กรุงเทพใต้','BE'],
+    ['BAY002','BAY ลาดพร้าว','เงินติดล้อ รังสิต','กรุงเทพเหนือ','BN'],
+    ['BAY003','BAY เชียงใหม่','เงินติดล้อ เชียงใหม่','เชียงใหม่','NO'],
+    ['BAY004','BAY ขอนแก่น','เงินติดล้อ ขอนแก่น','ขอนแก่น','EN'],
+  ];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:16},{wch:22},{wch:26},{wch:20},{wch:8}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Mapping');
+  XLSX.writeFile(wb, 'template_mapping.xlsx');
+}
+
 async function loadCounts() {
   try {
     const res  = await fetch(`${GAS_URL}?action=getMasters`);
     const data = await res.json();
     if (data.status === 'ok') {
-      document.getElementById('cnt-bay').textContent  = data.bay.length;
-      document.getElementById('cnt-ngn').textContent  = data.ngn.length;
-      document.getElementById('cnt-area').textContent = data.area.length;
+      document.getElementById('cnt-bay').textContent = data.bay.length;
+      document.getElementById('cnt-ngn').textContent = data.ngn.length;
     }
   } catch(e) {}
 }
