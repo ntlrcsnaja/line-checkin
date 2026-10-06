@@ -313,7 +313,7 @@ async function loadMasters() {
       masters.ngn    = d.ngn.map(x=>x.name);
       masters.area   = d.area.map(x=>x.name);
       const rgns     = [...new Set(d.ngn.map(x=>x.region).filter(Boolean))];
-      masters.sectors = rgns.length ? rgns : ['ภาคเหนือ','ภาคใต้','ภาคตะวันออก','ภาคตะวันตก','ภาคกลาง','ภาคอีสาน'];
+      masters.sectors = rgns.length ? rgns : ['BE','BS','BN','ES','EN','CN','CE','NO','SO'];
     }
   } catch(_) {
     masters.bay     = ['BAY สยามพารากอน','BAY เซ็นทรัลเวิลด์','BAY ลาดพร้าว','BAY บางนา','BAY รัชดา','BAY พระราม 9'];
