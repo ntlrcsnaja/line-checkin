@@ -244,7 +244,7 @@ html,body{height:100%;font-family:'Noto Sans Thai',system-ui,sans-serif;backgrou
 <div class="toast ng" id="t-ng">❌ เกิดข้อผิดพลาด ลองใหม่อีกครั้ง</div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbz6T9TYIHj8u3NH7tUEYNKNC3LkrmeJc0LLvGjm2FWyGdAIjF3Cd1n7pOOJyA6fs-NBCQ/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycby33WVT6MGqDmLSAGP6DVSEYSpYHn-T6gpUXmDN-3OUX0yrwwl-O76WaMK-CCx90AdzEQ/exec';
 const LIFF_ID = '2011871894-qTJSFRVJ';
 
 const masters = { bay:[] };
@@ -488,7 +488,8 @@ async function submitForm() {
     area:         chosen.area,
     sector:       chosen.sector,
     activity:     actVal,
-    accompany:    chosen.accompany.join(', ')
+    accompany:    chosen.accompany.join(', '),
+    imageBase64:  photoBase64 || ''
   };
 
   try {
@@ -499,7 +500,6 @@ async function submitForm() {
     });
     document.getElementById('loading').classList.remove('show');
 
-    // no-cors ไม่สามารถอ่าน response ได้ ถือว่าสำเร็จ
     if (true) {
       const data = { status: 'ok', date: new Date().toLocaleDateString('th-TH'), time: new Date().toLocaleTimeString('th-TH') };
       showToast('ok');
