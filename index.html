@@ -291,15 +291,29 @@ async function loadMasters() {
 // ── Photo ──
 function handlePhoto(input) {
   const f = input.files[0]; if (!f) return;
-  if (f.size > 5*1024*1024) { alert('ไฟล์ใหญ่เกิน 5MB'); return; }
+  if (f.size > 10*1024*1024) { alert('ไฟล์ใหญ่เกิน 10MB'); return; }
   const r = new FileReader();
   r.onload = e => {
-    photoBase64 = e.target.result;
-    const img = document.getElementById('photo-preview');
-    img.src = photoBase64; img.style.display = 'block';
-    document.getElementById('photo-ph').style.display = 'none';
-    document.getElementById('photo-change').style.display = 'block';
-    hideErr('photo');
+    const img2 = new Image();
+    img2.onload = () => {
+      // Compress ลดขนาดไม่เกิน 800px และ quality 70%
+      const canvas = document.createElement('canvas');
+      let w = img2.width, h = img2.height;
+      const max = 800;
+      if (w > max || h > max) {
+        if (w > h) { h = Math.round(h * max / w); w = max; }
+        else { w = Math.round(w * max / h); h = max; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img2, 0, 0, w, h);
+      photoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+      const preview = document.getElementById('photo-preview');
+      preview.src = photoBase64; preview.style.display = 'block';
+      document.getElementById('photo-ph').style.display = 'none';
+      document.getElementById('photo-change').style.display = 'block';
+      hideErr('photo');
+    };
+    img2.src = e.target.result;
   };
   r.readAsDataURL(f);
 }
