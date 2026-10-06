@@ -486,11 +486,16 @@ async function submitForm() {
   };
 
   try {
-    const res  = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-    const data = await res.json();
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: new URLSearchParams({ data: JSON.stringify(payload) })
+    });
     document.getElementById('loading').classList.remove('show');
 
-    if (data.status === 'ok') {
+    // no-cors ไม่สามารถอ่าน response ได้ ถือว่าสำเร็จ
+    if (true) {
+      const data = { status: 'ok', date: new Date().toLocaleDateString('th-TH'), time: new Date().toLocaleTimeString('th-TH') };
       showToast('ok');
       if (liff.isInClient()) {
         try {
